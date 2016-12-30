@@ -10,20 +10,20 @@ float tempF;
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  // setup_wifi();
-  // setup_mqtt();
-  sensor.begin();
+  setup_wifi();
+  setup_mqtt();
+  // sensor.begin();
 }
 
 void loop() {
-  // if(!client.connected()) {
-  //   reconnect();
-  // }
-  // client.loop();
-  // client.subscribe("bbq/client");
-  tempC = sensor.readTemperature();
-  tempF = tempC * 9.0 / 5.0 + 32.0;
-  Serial.println(tempF);
-  Serial.println(sensor1.readFarenheit());
-  delay(2000);
+  if(!client.connected()) {
+    reconnect();
+  }
+  client.loop();
+  client.subscribe("test");
+  // tempC = sensor.readTemperature();
+  // tempF = tempC * 9.0 / 5.0 + 32.0;
+  // Serial.println(tempF);
+  // Serial.println(sensor1.readFarenheit());
+  // delay(2000);
 }
