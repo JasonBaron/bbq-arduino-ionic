@@ -1,0 +1,17 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      BBQ
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding="">
+    <chart [options]="options" (load)="saveChart($event.context)" style="display: block; width: 99%;">
+          <!--<series (hide)="onSeriesHide($event.context)">
+              <point (select)="onPointSelect($event.context)"></point>
+          </series>-->
+    </chart>
+    <button (click)="stop()" style="display: block; width: 150px; height: 25px;">Stop</button>
+    <h2>Connection status: {{status}}</h2>
+</ion-content>
