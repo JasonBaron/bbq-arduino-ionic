@@ -5,8 +5,6 @@
 #define w_ssid "wagnernet"
 #define w_pass "michael1"
 
-void setup_wifi();
-
 void setup_wifi() {
   delay(10);
   Serial.println();

@@ -10,10 +10,6 @@
 
 #define in_topic "client/config"
 
-void callback(char* topic, byte* payload, unsigned int length);
-void setup_mqtt();
-void reconnect();
-
 WiFiClient espClient;
 PubSubClient client(espClient);
 
