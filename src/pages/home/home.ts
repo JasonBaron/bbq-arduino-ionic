@@ -45,9 +45,9 @@ export class HomePage {
         labels: {
           format: "{value}\u00B0F"
         },
-        minTickInterval: 5,
+        minTickInterval: 1,
         maxTickInterval: 5,
-        min: 70,
+        min: 80,
         max: 90
       },
       tooltip: {
@@ -55,7 +55,7 @@ export class HomePage {
         xDateFormat: "%A, %b %e, %I:%M:%S %P"
       }
     };
-    // this.mqtt(); //Disable for Ionic View
+    this.mqtt(); //Disable for Ionic View
 
     // this.stopPoll = setInterval(() => { //Disable for Ionic View
     //   let jsonMessage: Object = {
@@ -67,23 +67,23 @@ export class HomePage {
     //   this.client.send(message);
     // }, 1000);
 
-    this.stopPoll = setInterval(() => { //Enable for Ionic View
-      let jsonMessage: Object = {
-        time: Date.now(),
-        temp: Math.floor(Math.random() * (90 - 70 + 1) + 70)
-      }
-      if (this.chart.series[0].data.length === 15) {
-        this.chart.series[0].addPoint([
-          jsonMessage['time'],
-          jsonMessage['temp']
-        ], true, true);
-      } else {
-        this.chart.series[0].addPoint([
-          jsonMessage['time'],
-          jsonMessage['temp']
-        ]);
-      }
-    }, 1000);
+    // this.stopPoll = setInterval(() => { //Enable for Ionic View
+    //   let jsonMessage: Object = {
+    //     time: Date.now(),
+    //     temp: Math.floor(Math.random() * (90 - 70 + 1) + 70)
+    //   }
+    //   if (this.chart.series[0].data.length === 15) {
+    //     this.chart.series[0].addPoint([
+    //       jsonMessage['time'],
+    //       jsonMessage['temp']
+    //     ], true, true);
+    //   } else {
+    //     this.chart.series[0].addPoint([
+    //       jsonMessage['time'],
+    //       jsonMessage['temp']
+    //     ]);
+    //   }
+    // }, 1000);
   }
 
   mqtt(): void {
@@ -103,12 +103,12 @@ export class HomePage {
           if (jsonMsg.hasOwnProperty('temp') && jsonMsg.hasOwnProperty('time')) {
             if (this.chart.series[0].data.length === 30) {
               this.chart.series[0].addPoint([
-                jsonMsg['time'],
+              jsonMsg['time'] * 1000,
                 jsonMsg['temp']
               ], true, true);
             } else {
               this.chart.series[0].addPoint([
-                jsonMsg['time'],
+              jsonMsg['time'] * 1000,
                 jsonMsg['temp']
               ]);
             }
