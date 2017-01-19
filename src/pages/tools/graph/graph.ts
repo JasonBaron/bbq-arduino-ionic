@@ -1,22 +1,22 @@
 import { Component } from '@angular/core';
-
-import { NavController } from 'ionic-angular';
+import { NavController, NavParams, ToastController } from 'ionic-angular';
 import * as Highcharts from 'highcharts';
 
 declare var Paho: any;
 
 @Component({
-  selector: 'page-home',
-  templateUrl: 'home.html'
+  selector: 'page-graph',
+  templateUrl: 'graph.html'
 })
-export class HomePage {
+export class GraphPage {
   public chart: any;
   private options: Object;
   private client: any;
-  public status: string;
-  public stopPoll: number;
 
-  constructor(public navCtrl: NavController) {
+  constructor(
+    public navCtrl: NavController,
+    public navParams: NavParams,
+    public toastCtrl: ToastController) {
     Highcharts.setOptions({
       global: {
         useUTC: false
@@ -55,7 +55,7 @@ export class HomePage {
         xDateFormat: "%A, %b %e, %I:%M:%S %P"
       }
     };
-    this.mqtt(); //Disable for Ionic View
+    this.mqtt();
 
     // this.stopPoll = setInterval(() => { //Disable for Ionic View
     //   let jsonMessage: Object = {
@@ -90,11 +90,14 @@ export class HomePage {
     this.client = new Paho.MQTT.Client(
       "m13.cloudmqtt.com",
       37347,
-      "client-" + Math.round(Math.random() * 1000)
+      "client-" + Date.now()
     );
     this.client.onConnectionLost = (res: any) => {
       console.warn('Connection to CloudMQTT lost!');
-      this.status = "DISCONNECTED";
+      this.toastCtrl.create({
+        message: 'DISCONNECTED',
+        duration: 3000
+      }).present();
     };
     this.client.onMessageArrived = (msg: any) => {
       try {
@@ -103,12 +106,12 @@ export class HomePage {
           if (jsonMsg.hasOwnProperty('temp') && jsonMsg.hasOwnProperty('time')) {
             if (this.chart.series[0].data.length === 30) {
               this.chart.series[0].addPoint([
-              jsonMsg['time'] * 1000,
+                jsonMsg['time'] * 1000,
                 jsonMsg['temp']
               ], true, true);
             } else {
               this.chart.series[0].addPoint([
-              jsonMsg['time'] * 1000,
+                jsonMsg['time'] * 1000,
                 jsonMsg['temp']
               ]);
             }
@@ -121,14 +124,20 @@ export class HomePage {
     this.client.connect({
       onSuccess: () => {
         console.log('Connected to CloudMQTT broker.');
-        this.status = "CONNECTED";
+        this.toastCtrl.create({
+          message: 'CONNECTED',
+          duration: 3000
+        }).present();
 
         // this.client.subscribe("sensor/grill");
         this.client.subscribe("test");
       },
       onFailure: () => {
         console.error('Failed to connect to CloudMQTT broker.');
-        this.status = "DISCONNECTED";
+        this.toastCtrl.create({
+          message: 'DISCONNECTED',
+          duration: 3000
+        }).present();
       },
       userName: "app",
       password: "jrSwHCU5b588",
@@ -140,7 +149,7 @@ export class HomePage {
     this.chart = chart;
   }
 
-  public stop() {
-    clearInterval(this.stopPoll);
+  ionViewDidLoad() {
+    console.log('ionViewDidLoad GraphPage');
   }
 }

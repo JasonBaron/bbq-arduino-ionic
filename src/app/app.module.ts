@@ -1,13 +1,23 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
-import { HomePage } from '../pages/home/home';
+import { ProbesPage } from '../pages/probes/probes';
+import { TabsPage } from '../pages/tabs/tabs';
+import { ConfigPage } from '../pages/config/config';
+import { ToolsPage } from '../pages/tools/tools';
+import { GraphPage } from '../pages/tools/graph/graph';
+import { TimerPage } from '../pages/tools/timer/timer';
 import { ChartModule } from 'angular2-highcharts';
 
 @NgModule({
   declarations: [
     MyApp,
-    HomePage,
+    ProbesPage,
+    TabsPage,
+    ConfigPage,
+    ToolsPage,
+    GraphPage,
+    TimerPage
   ],
   imports: [
     IonicModule.forRoot(MyApp),
@@ -16,7 +26,12 @@ import { ChartModule } from 'angular2-highcharts';
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HomePage
+    ProbesPage,
+    TabsPage,
+    ConfigPage,
+    ToolsPage,
+    GraphPage,
+    TimerPage
   ],
   providers: [
       {
