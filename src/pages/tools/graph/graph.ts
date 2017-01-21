@@ -96,7 +96,8 @@ export class GraphPage {
       console.warn('Connection to CloudMQTT lost!');
       this.toastCtrl.create({
         message: 'DISCONNECTED',
-        duration: 3000
+        duration: 3000,
+        position: 'top'
       }).present();
     };
     this.client.onMessageArrived = (msg: any) => {
@@ -126,7 +127,8 @@ export class GraphPage {
         console.log('Connected to CloudMQTT broker.');
         this.toastCtrl.create({
           message: 'CONNECTED',
-          duration: 3000
+          duration: 3000,
+          position: 'top'
         }).present();
 
         // this.client.subscribe("sensor/grill");
@@ -136,7 +138,8 @@ export class GraphPage {
         console.error('Failed to connect to CloudMQTT broker.');
         this.toastCtrl.create({
           message: 'DISCONNECTED',
-          duration: 3000
+          duration: 3000,
+          position: 'top'
         }).present();
       },
       userName: "app",

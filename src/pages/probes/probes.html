@@ -13,7 +13,7 @@
         <h1 style="margin-bottom: 20px;">Probe 1</h1>
       </ion-col>
       <ion-col padding-right text-right>
-        <button ion-button clear large class="probeHeaderBtn" style="display: inline-block; vertical-align: middle;">
+        <button ion-button clear large class="probeHeaderBtn" [navPush]="pushConfigPage">
             <h3 style="margin-top: 10px;">Set</h3>
         </button>
       </ion-col>
@@ -30,7 +30,7 @@
 
     <ion-row>
       <ion-col>
-        
+        <progressbar [hidden]="hideProgressbar" class="progress" [max]="desiredProbe1Temp" [value]="currentProbe1Temp"></progressbar>
       </ion-col>
     </ion-row>
   </ion-grid>

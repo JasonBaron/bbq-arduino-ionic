@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Config</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-list radio-group [(ngModel)]="beef">
+    <ion-list-header>Beef &amp; Lamb</ion-list-header>
+    <ion-item>
+      <ion-label>Rare: 130&deg;F</ion-label>
+      <ion-radio value="130" (click)="customSlider(false)" [checked]="defaultCheck"></ion-radio>
+    </ion-item>
+    <ion-item>
+      <ion-label>Medium-Rare: 135&deg;F</ion-label>
+      <ion-radio value="135" (click)="customSlider(false)"></ion-radio>
+    </ion-item>
+    <ion-item>
+      <ion-label>Medium: 147&deg;F</ion-label>
+      <ion-radio value="147" (click)="customSlider(false)"></ion-radio>
+    </ion-item>
+    <ion-item>
+      <ion-label>Medium-Well: 160&deg;F</ion-label>
+      <ion-radio value="160" (click)="customSlider(false)"></ion-radio>
+    </ion-item>
+    <ion-item>
+      <ion-label>Well: 170&deg;F</ion-label>
+      <ion-radio value="170" (click)="customSlider(false)"></ion-radio>
+    </ion-item>
+    <ion-item>
+      <ion-label>Custom: {{ custom }}&deg;F</ion-label>
+      <ion-radio value="custom" (click)="customSlider(true)"></ion-radio>
+    </ion-item>
+    <ion-item>
+      <ion-range min="150" max="250" [(ngModel)]="custom" color="primary" pin="true" [hidden]="customDisabled" [disabled]="customDisabled">
+        <ion-label range-left>150&deg;F</ion-label>
+        <ion-label range-right>250&deg;F</ion-label>
+      </ion-range>
+    </ion-item>
+  </ion-list>
+  <button ion-button navPop (click)="setDesiredTemp()">Set desired grill temperature</button>
+</ion-content>
