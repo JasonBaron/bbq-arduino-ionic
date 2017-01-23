@@ -7,12 +7,23 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { ConfigPage } from '../pages/probes/config/config';
 import { ToolsPage } from '../pages/tools/tools';
 import { GraphPage } from '../pages/tools/graph/graph';
-import { TimerPage } from '../pages/tools/timer/timer';
 import { ChartModule } from 'angular2-highcharts';
 import { ProgressbarModule } from 'ng2-bootstrap';
+import { MqttModule, MqttService } from 'angular2-mqtt';
 
 export function provideStorage() {
   return new Storage(['localstorage', 'indexeddb', 'websql'], { name: '__mydb' });
+}
+
+export function mqttServiceFactory() {
+  return new MqttService({
+    hostname: 'm13.cloudmqtt.com',
+    port: 37347,
+    protocol: 'wss',
+    clientId: "client-" + Date.now(),
+    username: 'app',
+    password: 'jrSwHCU5b588'
+  });
 }
 
 @NgModule({
@@ -22,13 +33,16 @@ export function provideStorage() {
     TabsPage,
     ConfigPage,
     ToolsPage,
-    GraphPage,
-    TimerPage
+    GraphPage
   ],
   imports: [
     IonicModule.forRoot(MyApp),
     ChartModule,
-    ProgressbarModule.forRoot()
+    ProgressbarModule.forRoot(),
+    MqttModule.forRoot({
+      provide: MqttService,
+      useFactory: mqttServiceFactory
+    })
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -37,8 +51,7 @@ export function provideStorage() {
     TabsPage,
     ConfigPage,
     ToolsPage,
-    GraphPage,
-    TimerPage
+    GraphPage
   ],
   providers: [
       {

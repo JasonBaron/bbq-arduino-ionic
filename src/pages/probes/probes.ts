@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { ConfigPage } from './config/config';
+import { MqttService } from 'angular2-mqtt';
 
 @Component({
   selector: 'page-probes',
@@ -17,7 +18,8 @@ export class ProbesPage {
 
   constructor(
     public navCtrl: NavController,
-    public storage: Storage
+    public storage: Storage,
+    public mqtt: MqttService
   ) {
     this.pushConfigPage = ConfigPage;
     this.hideProgressbar = true;

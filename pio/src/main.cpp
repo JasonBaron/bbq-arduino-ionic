@@ -27,7 +27,7 @@ void loop() {
   }
 
   tempC = sensor.readTemperature(); // Blynk on-board sensor
-  time_t timeTaken = now();
+  time_t timeTaken = now() * 1000;
   tempF = tempC * 9.0 / 5.0 + 32.0;
   // tempF = sensor1.readFarenheit(); // Adafruit MAX31855
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer2;
@@ -44,6 +44,7 @@ void loop() {
     Serial.print(" to ");
     Serial.println(test_topic);
   }
+  Serial.println(config.grillTemp);
   client.loop();
   delay(2000);
 }

@@ -13,10 +13,11 @@
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+Configs config = { 0, 5, false };
 
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(2) + JSON_ARRAY_SIZE(0);
 StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
-const char* temp;
+// const char* temp;
 
 void callback(char* topic, byte* payload, unsigned int length) {
   byte* payloadCopy = (byte*)malloc(length);
@@ -27,18 +28,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
     inData[i] = (char)payloadCopy[i];
   }
   // Serial.println(inData);
-  
-  // JsonObject& config = jsonBuffer.parseObject(inData);
-  // if(config.containsKey("desired-temp")) {
-  //   if(config["desired-temp"].is<char*>()) {
-  //     temp = config["desired-temp"];
-  //   } else {
-  //     temp = "invalid type";
-  //   }
-  // } else {
-  //   temp = "invalid key";
-  // }
-  // Serial.println(temp);
+
+  JsonObject& jsonConfig = jsonBuffer.parseObject(inData);
+  if(jsonConfig.containsKey("desired-temp")) {
+    if(jsonConfig["desired-temp"].is<int>()) {
+      config.grillTemp = jsonConfig["desired-temp"];
+    } else {
+      config.grillTemp = 0;
+    }
+  } else {
+    config.grillTemp = 0;
+  }
   free(payloadCopy);
 }
 
