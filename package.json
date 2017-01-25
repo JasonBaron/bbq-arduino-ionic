@@ -1,7 +1,7 @@
 {
-  "name": "ionic-hello-world",
-  "author": "Ionic Framework",
-  "homepage": "http://ionicframework.com/",
+  "name": "bbq-arduino",
+  "author": "mdwagner",
+  "homepage": "https://github.com/mdwagner/bbq-arduino",
   "private": true,
   "scripts": {
     "clean": "ionic-app-scripts clean",
@@ -24,17 +24,18 @@
     "angular2-mqtt": "^1.5.1",
     "bootstrap": "^3.3.7",
     "chart.js": "^2.4.0",
-    "ionic-angular": "2.0.0-rc.4",
-    "ionic-native": "2.2.11",
+    "ionic-angular": "2.0.0",
+    "ionic-native": "2.4.1",
     "ionicons": "3.0.0",
     "ng2-bootstrap": "^1.2.6",
     "ng2-charts": "^1.4.4",
     "ng2-mqtt": "^0.1.2",
     "rxjs": "5.0.0-beta.12",
-    "zone.js": "0.6.26"
+    "zone.js": "0.6.26",
+    "sw-toolbox": "3.4.0"
   },
   "devDependencies": {
-    "@ionic/app-scripts": "0.0.47",
+    "@ionic/app-scripts": "1.0.0",
     "typescript": "2.0.9"
   },
   "cordovaPlugins": [
@@ -46,5 +47,5 @@
     "cordova-plugin-splashscreen"
   ],
   "cordovaPlatforms": [],
-  "description": "bbq: An Ionic project"
+  "description": "An Ionic 2 app that communicates with an Arduino board via MQTT, to monitor the temperature on a charcoal grill and adjust with fans."
 }
