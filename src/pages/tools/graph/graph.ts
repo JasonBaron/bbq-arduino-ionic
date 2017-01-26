@@ -3,6 +3,8 @@ import { NavController, NavParams, ToastController } from 'ionic-angular';
 import * as Highcharts from 'highcharts';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
 
+const TOPIC: string = 'test';
+
 @Component({
   selector: 'page-graph',
   templateUrl: 'graph.html'
@@ -62,21 +64,21 @@ export class GraphPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad GraphPage');
-    this.mqtt.observe('test').subscribe(
+    this.mqtt.observe(TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {
-          if (msg.topic === 'test') {
+          if (msg.topic === TOPIC) {
             let jsonMsg: Object = JSON.parse(msg.payload.toString());
-            if (jsonMsg.hasOwnProperty('temp') && jsonMsg.hasOwnProperty('time')) {
+            if (jsonMsg.hasOwnProperty('grillTempRecorded') && jsonMsg.hasOwnProperty('timeRecorded')) {
               if (this.chart.series[0].data.length === 30) {
                 this.chart.series[0].addPoint([
-                  jsonMsg['time'],
-                  jsonMsg['temp']
+                jsonMsg['timeRecorded'] * 1000,
+                  jsonMsg['grillTempRecorded']
                 ], true, true);
               } else {
                 this.chart.series[0].addPoint([
-                  jsonMsg['time'],
-                  jsonMsg['temp']
+                jsonMsg['timeRecorded'] * 1000,
+                  jsonMsg['grillTempRecorded']
                 ]);
               }
             }

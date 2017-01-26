@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
+import { MqttService } from 'angular2-mqtt';
+
+const TOPIC: string = 'test';
 
 @Component({
   selector: 'page-config',
@@ -14,7 +17,8 @@ export class ConfigPage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    public storage: Storage
+    public storage: Storage,
+    public mqtt: MqttService
   ) {
     this.beef = 130;
     this.custom = 200;
@@ -22,13 +26,22 @@ export class ConfigPage {
   }
 
   setDesiredTemp() {
+    let jsonObj: string;
+    let grillTemp: number;
     if (this.beef === 'custom') {
-      this.storage.set('desiredGrillTemp', this.custom);
-      console.log(this.custom);
+      grillTemp = this.custom;
     } else {
-      this.storage.set('desiredGrillTemp', this.beef);
-      console.log(this.beef);
+      grillTemp = parseInt(this.beef);
     }
+    this.storage.set('grillTemp', grillTemp);
+    jsonObj = JSON.stringify({
+      grillTemp: grillTemp,
+      killswitch: false
+    });
+    console.info(`Desired Grill Temp: ${grillTemp}`);
+    this.mqtt.publish(TOPIC, jsonObj).subscribe((error) => {
+      console.warn(error);
+    });
   }
 
   customSlider(e: boolean) {

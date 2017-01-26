@@ -1,4 +1,4 @@
-#include "Arduino.h"
+#include <Arduino.h>
 #include <ArduinoJson.h>
 #include "functions.h"
 #include <PubSubClient.h>
@@ -13,31 +13,42 @@
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-Configs config = { 0, 5, false };
+Configs config = { 0, 0, 5, true };
 
-const int BUFFER_SIZE = JSON_OBJECT_SIZE(2) + JSON_ARRAY_SIZE(0);
-StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
-// const char* temp;
+const int BUFFER_SIZE = JSON_OBJECT_SIZE(4) + JSON_ARRAY_SIZE(0);
 
 void callback(char* topic, byte* payload, unsigned int length) {
   byte* payloadCopy = (byte*)malloc(length);
   memcpy(payloadCopy,payload,length);
   char inData[length];
-  // Serial.print("inData:");
   for(int i=0; i<length; i++) {
     inData[i] = (char)payloadCopy[i];
   }
-  // Serial.println(inData);
-
-  JsonObject& jsonConfig = jsonBuffer.parseObject(inData);
-  if(jsonConfig.containsKey("desired-temp")) {
-    if(jsonConfig["desired-temp"].is<int>()) {
-      config.grillTemp = jsonConfig["desired-temp"];
-    } else {
-      config.grillTemp = 0;
+  if(strcmp(topic, test_topic) == 0) {
+    StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+    JsonObject& jsonConfig = jsonBuffer.parseObject(inData);
+    if(jsonConfig.containsKey("grillTemp")) {
+      if(jsonConfig["grillTemp"].is<int>()) {
+        config.grillTemp = jsonConfig.get<unsigned int>("grillTemp");
+      }
     }
-  } else {
-    config.grillTemp = 0;
+    if(jsonConfig.containsKey("meatTemp")) {
+      if(jsonConfig["meatTemp"].is<int>()) {
+        config.meatTemp = jsonConfig.get<unsigned int>("meatTemp");
+      }
+    }
+    if(jsonConfig.containsKey("timeToCheck")) {
+      if(jsonConfig["timeToCheck"].is<int>()) {
+        config.timeToCheck = jsonConfig.get<signed int>("timeToCheck");
+      } else {
+        config.timeToCheck = 5;
+      }
+    }
+    if(jsonConfig.containsKey("killswitch")) {
+      if(jsonConfig["killswitch"].is<bool>()) {
+        config.killswitch = jsonConfig.get<bool>("killswitch");
+      }
+    }
   }
   free(payloadCopy);
 }

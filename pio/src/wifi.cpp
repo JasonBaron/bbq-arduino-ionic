@@ -1,4 +1,4 @@
-#include "Arduino.h"
+#include <Arduino.h>
 #include "functions.h"
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
@@ -36,11 +36,11 @@ void setup_wifi() {
   Serial.print("WiFi connected with ");
   Serial.println(WiFi.localIP());
 
-  Serial.println("Starting UDP");
+  // Serial.println("Starting UDP");
   udp.begin(localPort);
-  Serial.print("Local port: ");
-  Serial.println(udp.localPort());
-  Serial.println();
+  // Serial.print("Local port: ");
+  // Serial.println(udp.localPort());
+  // Serial.println();
 
   setSyncProvider(getNtpTime);
   setSyncInterval(10);

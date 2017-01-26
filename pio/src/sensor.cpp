@@ -1,8 +1,8 @@
-#include "Arduino.h"
+#include <Arduino.h>
 
 #include "functions.h"
 #include <SPI.h>
-#include "Adafruit_MAX31855.h"
+#include <Adafruit_MAX31855.h>
 
 int maxSO =  15;
 int maxCS = 13;
