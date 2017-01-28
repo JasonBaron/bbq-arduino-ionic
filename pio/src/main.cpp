@@ -46,21 +46,23 @@ void loop() {
           if(diff >= 0 && diff < 5) {
             analogWrite(fan_pin, 0); // 0%
           } else if(diff >= 5 && diff < 10) {
-            analogWrite(fan_pin, 51); // 20%
+            analogWrite(fan_pin, 204); // 20%
           } else if(diff >= 10 && diff < 15) {
-            analogWrite(fan_pin, 102); // 40%
+            analogWrite(fan_pin, 409); // 40%
           } else if(diff >= 15 && diff < 20) {
-            analogWrite(fan_pin, 153); // 60%
+            analogWrite(fan_pin, 613); // 60%
           } else if(diff >= 20 && diff < 25) {
-            analogWrite(fan_pin, 204); // 80%
+            analogWrite(fan_pin, 818); // 80%
           } else if(diff >= 25) {
-            analogWrite(fan_pin, 255); // 100%
+            analogWrite(fan_pin, 1023); // 100%
           }
         } else {
           Serial.println("Grill is done!");
           analogWrite(fan_pin, 0); // 0%
           config.killswitch = true;
         }
+      } else {
+        analogWrite(fan_pin, 0);
       }
     }
   }
