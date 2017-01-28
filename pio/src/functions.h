@@ -2,7 +2,8 @@
 #include <Adafruit_MAX31855.h>
 
 extern PubSubClient client;
-extern Adafruit_MAX31855 sensor1;
+extern Adafruit_MAX31855 grillSensor;
+extern Adafruit_MAX31855 meatSensor;
 
 struct Configs {
   int grillTemp;

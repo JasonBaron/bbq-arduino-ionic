@@ -1,16 +1,18 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include "functions.h"
-#include <SparkFunHTU21D.h>
+// #include <SparkFunHTU21D.h>
 #include <TimeLib.h>
 
 #define out_topic "sensor/grill"
 #define test_topic "test"
 #define fan_pin 15
 
-HTU21D sensor;
-float sensorTempC;
-float sensorTempF;
+// HTU21D sensor;
+// float sensorTempC;
+// float sensorTempF;
+float sensorGrillF;
+float sensorMeatF;
 long previousTime = 0;
 
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(0);
@@ -21,7 +23,7 @@ void setup() {
   Serial.println();
   setup_wifi();
   setup_mqtt();
-  sensor.begin();
+  // sensor.begin();
   pinMode(fan_pin, OUTPUT);
 }
 
@@ -35,14 +37,15 @@ void loop() {
     previousTime = currentTime;
     if(timeStatus() == timeSet) {
       if(!config.killswitch) {
-        sensorTempC = sensor.readTemperature(); // Blynk on-board sensor
-        // tempF = sensor1.readFarenheit(); // Adafruit MAX31855
+        // sensorTempC = sensor.readTemperature(); // Blynk on-board sensor
+        sensorGrillF = grillSensor.readFarenheit(); // Adafruit MAX31855 grill
+        sensorMeatF = meatSensor.readFarenheit(); // Adafruit MAX31855 meat
         long timeTaken = now();
-        sensorTempF = (sensorTempC * (9.0 / 5.0)) + 32.0;
-        send(sensorTempF, 0.0, timeTaken);
+        // sensorTempF = (sensorTempC * (9.0 / 5.0)) + 32.0;
+        send(sensorMeatF, sensorGrillF, timeTaken);
 
-        if(sensorTempF <= config.grillTemp) {
-          float diff = config.grillTemp - sensorTempF;
+        if(sensorGrillF <= config.grillTemp) {
+          float diff = config.grillTemp - sensorGrillF;
           if(diff >= 0 && diff < 5) {
             analogWrite(fan_pin, 0); // 0%
           } else if(diff >= 5 && diff < 10) {
@@ -61,7 +64,7 @@ void loop() {
           analogWrite(fan_pin, 0); // 0%
         }
 
-        if(sensorTempF >= config.meatTemp) {
+        if(sensorMeatF >= config.meatTemp) {
           Serial.println("Meat is done!");
           config.killswitch = true;
         }
@@ -72,9 +75,7 @@ void loop() {
   }
 }
 
-/*
- * Sensors must be in farenheit
- */
+// Sensors must be in farenheit
 void send(float meatSensor, float grillSensor, long timeRecorded) {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer2;
   JsonObject& object = jsonBuffer2.createObject();
