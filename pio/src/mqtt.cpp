@@ -39,7 +39,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     if(jsonConfig.containsKey("timeToCheck")) {
       if(jsonConfig["timeToCheck"].is<int>()) {
-        config.timeToCheck = jsonConfig.get<signed int>("timeToCheck");
+        config.timeToCheck = jsonConfig.get<unsigned int>("timeToCheck");
       } else {
         config.timeToCheck = 5;
       }

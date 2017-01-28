@@ -14,7 +14,7 @@ float sensorTempF;
 long previousTime = 0;
 
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(0);
-void send(float grillSensor, float meatSensor, long timeRecorded);
+void send(float meatSensor, float grillSensor, long timeRecorded);
 
 void setup() {
   Serial.begin(115200);
@@ -38,8 +38,8 @@ void loop() {
         sensorTempC = sensor.readTemperature(); // Blynk on-board sensor
         // tempF = sensor1.readFarenheit(); // Adafruit MAX31855
         long timeTaken = now();
-        sensorTempF = sensorTempC * 9.0 / 5.0 + 32.0;
-        send(sensorTempF, 0, timeTaken);
+        sensorTempF = (sensorTempC * (9.0 / 5.0)) + 32.0;
+        send(sensorTempF, 0.0, timeTaken);
 
         if(sensorTempF <= config.grillTemp) {
           float diff = config.grillTemp - sensorTempF;
@@ -59,10 +59,14 @@ void loop() {
         } else {
           Serial.println("Grill is done!");
           analogWrite(fan_pin, 0); // 0%
+        }
+
+        if(sensorTempF >= config.meatTemp) {
+          Serial.println("Meat is done!");
           config.killswitch = true;
         }
       } else {
-        analogWrite(fan_pin, 0);
+        analogWrite(fan_pin, 0); // 0%; Turn fan off if running
       }
     }
   }
@@ -71,11 +75,11 @@ void loop() {
 /*
  * Sensors must be in farenheit
  */
-void send(float grillSensor, float meatSensor, long timeRecorded) {
+void send(float meatSensor, float grillSensor, long timeRecorded) {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer2;
   JsonObject& object = jsonBuffer2.createObject();
-  object["grillTempRecorded"] = grillSensor;
   object["meatTempRecorded"] = meatSensor;
+  object["grillTempRecorded"] = grillSensor;
   object["timeRecorded"] = timeRecorded;
   size_t objLen = object.measureLength();
   size_t objSize = objLen + 1;
