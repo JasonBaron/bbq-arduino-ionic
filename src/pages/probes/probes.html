@@ -10,10 +10,10 @@
   <ion-grid>
     <ion-row class="probeHeader" center>
       <ion-col padding-left text-left>
-        <h1 style="margin-bottom: 20px;">Probe 1</h1>
+        <h1 style="margin-bottom: 20px;">Grill</h1>
       </ion-col>
       <ion-col padding-right text-right>
-        <button ion-button clear large class="probeHeaderBtn" [navPush]="pushConfigPage">
+        <button ion-button clear large class="probeHeaderBtn" [navPush]="pushGrillConfigPage">
             <h3 style="margin-top: 10px;">Set</h3>
         </button>
       </ion-col>
@@ -23,14 +23,55 @@
       <ion-col>
         <h2>
           <ion-icon name="thermometer"></ion-icon>
-          Temperature: {{ probe1temp }}
+          Temperature: {{ currentProbe1Temp }}&deg;F
         </h2>
       </ion-col>
     </ion-row>
 
     <ion-row>
       <ion-col>
-        <progressbar [hidden]="hideProgressbar" class="progress" [max]="desiredProbe1Temp" [value]="currentProbe1Temp"></progressbar>
+        <progressbar [hidden]="hideGrillProgressbar" class="progress" [max]="desiredProbe1Temp" [value]="currentProbe1Temp"></progressbar>
+      </ion-col>
+    </ion-row>
+
+    <!-- |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| -->
+
+    <ion-row class="probeHeader" center>
+      <ion-col padding-left text-left>
+        <h1 style="margin-bottom: 20px;">Meat</h1>
+      </ion-col>
+      <ion-col padding-right text-right>
+        <button ion-button clear large class="probeHeaderBtn" [navPush]="pushMeatConfigPage">
+            <h3 style="margin-top: 10px;">Set</h3>
+        </button>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+        <h2>
+          <ion-icon name="thermometer"></ion-icon>
+          Temperature: {{ currentProbe2Temp }}&deg;F
+        </h2>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+        <progressbar [hidden]="hideMeatProgressbar" class="progress" [max]="desiredProbe2Temp" [value]="currentProbe2Temp"></progressbar>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+        <button ion-button (click)="stop()">
+          Stop
+        </button>
+      </ion-col>
+      <ion-col>
+        <button ion-button (click)="start()">
+          Start
+        </button>
       </ion-col>
     </ion-row>
   </ion-grid>

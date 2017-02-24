@@ -4,12 +4,13 @@ import { Storage } from '@ionic/storage';
 import { MyApp } from './app.component';
 import { ProbesPage } from '../pages/probes/probes';
 import { TabsPage } from '../pages/tabs/tabs';
-import { ConfigPage } from '../pages/probes/config/config';
+import { GrillConfigPage } from '../pages/probes/grill-config/grill-config';
 import { ToolsPage } from '../pages/tools/tools';
 import { GraphPage } from '../pages/tools/graph/graph';
 import { ChartModule } from 'angular2-highcharts';
 import { ProgressbarModule } from 'ng2-bootstrap';
 import { MqttModule, MqttService } from 'angular2-mqtt';
+import { MeatConfigPage } from '../pages/probes/meat-config/meat-config';
 
 export function provideStorage() {
   return new Storage(['localstorage', 'indexeddb', 'websql'], { name: '__mydb' });
@@ -31,7 +32,8 @@ export function mqttServiceFactory() {
     MyApp,
     ProbesPage,
     TabsPage,
-    ConfigPage,
+    GrillConfigPage,
+    MeatConfigPage,
     ToolsPage,
     GraphPage
   ],
@@ -49,7 +51,8 @@ export function mqttServiceFactory() {
     MyApp,
     ProbesPage,
     TabsPage,
-    ConfigPage,
+    GrillConfigPage,
+    MeatConfigPage,
     ToolsPage,
     GraphPage
   ],

@@ -1,15 +1,12 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
-import { MqttService } from 'angular2-mqtt';
-
-const TOPIC: string = 'test';
 
 @Component({
-  selector: 'page-config',
-  templateUrl: 'config.html'
+  selector: 'page-grill-config',
+  templateUrl: 'grill-config.html'
 })
-export class ConfigPage {
+export class GrillConfigPage {
   public beef: any;
   public custom: any;
   public customDisabled: boolean;
@@ -17,8 +14,7 @@ export class ConfigPage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    public storage: Storage,
-    public mqtt: MqttService
+    public storage: Storage
   ) {
     this.beef = 130;
     this.custom = 200;
@@ -26,7 +22,6 @@ export class ConfigPage {
   }
 
   setDesiredTemp() {
-    let jsonObj: string;
     let grillTemp: number;
     if (this.beef === 'custom') {
       grillTemp = this.custom;
@@ -34,14 +29,7 @@ export class ConfigPage {
       grillTemp = parseInt(this.beef);
     }
     this.storage.set('grillTemp', grillTemp);
-    jsonObj = JSON.stringify({
-      grillTemp: grillTemp,
-      killswitch: false
-    });
     console.info(`Desired Grill Temp: ${grillTemp}`);
-    this.mqtt.publish(TOPIC, jsonObj).subscribe((error) => {
-      console.warn(error);
-    });
   }
 
   customSlider(e: boolean) {
@@ -49,7 +37,7 @@ export class ConfigPage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad ConfigPage');
+    console.log('ionViewDidLoad GrillConfigPage');
     this.defaultCheck = true;
   }
 

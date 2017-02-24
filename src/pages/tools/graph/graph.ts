@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, ToastController } from 'ionic-angular';
+import { NavController, NavParams } from 'ionic-angular';
 import * as Highcharts from 'highcharts';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
 
@@ -16,7 +16,6 @@ export class GraphPage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    public toastCtrl: ToastController,
     public mqtt: MqttService) {
     Highcharts.setOptions({
       global: {
@@ -70,16 +69,18 @@ export class GraphPage {
           if (msg.topic === TOPIC) {
             let jsonMsg: Object = JSON.parse(msg.payload.toString());
             if (jsonMsg.hasOwnProperty('grillTempRecorded') && jsonMsg.hasOwnProperty('timeRecorded')) {
-              if (this.chart.series[0].data.length === 30) {
-                this.chart.series[0].addPoint([
-                jsonMsg['timeRecorded'] * 1000,
-                  jsonMsg['grillTempRecorded']
-                ], true, true);
-              } else {
-                this.chart.series[0].addPoint([
-                jsonMsg['timeRecorded'] * 1000,
-                  jsonMsg['grillTempRecorded']
-                ]);
+              if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
+                if (this.chart.series[0].data.length === 30) {
+                  this.chart.series[0].addPoint([
+                    jsonMsg['timeRecorded'] * 1000,
+                    jsonMsg['grillTempRecorded']
+                  ], true, true);
+                } else {
+                  this.chart.series[0].addPoint([
+                    jsonMsg['timeRecorded'] * 1000,
+                    jsonMsg['grillTempRecorded']
+                  ]);
+                }
               }
             }
           }

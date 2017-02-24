@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Meat Config</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+  <ion-list>
+    <ion-list-header>Meat</ion-list-header>
+    <ion-item>
+      <ion-range min="150" max="250" [(ngModel)]="meat" color="primary" pin="true">
+        <ion-label range-left>150&deg;F</ion-label>
+        <ion-label range-right>250&deg;F</ion-label>
+      </ion-range>
+    </ion-item>
+  </ion-list>
+  <button ion-button navPop (click)="setDesiredTemp()">Set desired meat temperature</button>
+</ion-content>
