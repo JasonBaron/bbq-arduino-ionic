@@ -20,9 +20,6 @@ export class ProbesPage {
   public desiredProbe1Temp;
   public currentProbe2Temp;
   public desiredProbe2Temp;
-  private timeToCheckBool: boolean;
-  private grillTempBool: boolean;
-  private meatTempBool: boolean;
 
   constructor(
     public navCtrl: NavController,
@@ -37,9 +34,6 @@ export class ProbesPage {
     this.desiredProbe1Temp = 0;
     this.currentProbe2Temp = 0;
     this.desiredProbe2Temp = 0;
-    this.timeToCheckBool = true;
-    this.grillTempBool = true;
-    this.meatTempBool = true;
   }
 
   stop() {
@@ -59,44 +53,28 @@ export class ProbesPage {
 
     this.storage.get('grillTemp').then(
       (val) => {
-        // debugger;
-        if (val) {
-          grillTemp = val;
-        } else {
-          this.grillTempBool = false;
-        }
+        grillTemp = val;
       }
     );
-    console.log(this.grillTempBool);
-    // this.storage.get('meatTemp').then(
-    //   (val) => {
-    //     meatTemp = val;
-    //   },
-    //   (error) => {
-    //     meatTempBool = false;
-    //   }
-    // );
-
-    // this.storage.get('timeToCheck').then(
-    //   (val) => {
-    //     timeToCheck = val;
-    //   },
-    //   (error) => {
-    //     timeToCheckBool = false;
-    //   }
-    // );
-    
-    // if (!grillTempBool || !meatTempBool || !timeToCheckBool) {
-    //   console.log("error");
-    // }
-
-    // let jsonMsg = JSON.stringify({
-    //   killswitch: false,
-    //   timeToCheck: 5
-    // });
-    // this.mqtt.publish(TOPIC, jsonMsg).subscribe((error) => {
-    //   console.warn(error);
-    // });
+    this.storage.get('meatTemp').then(
+      (val) => {
+        meatTemp = val;
+      }
+    );
+    this.storage.get('timeToCheck').then(
+      (val) => {
+        timeToCheck = val;
+      }
+    );
+    let jsonMsg = JSON.stringify({
+      killswitch: false,
+      timeToCheck: timeToCheck,
+      grillTemp: grillTemp,
+      meatTemp: meatTemp
+    });
+    this.mqtt.publish(TOPIC, jsonMsg).subscribe((error) => {
+      console.warn(error);
+    });
   }
 
   ionViewDidLoad() {
