@@ -19,11 +19,11 @@ export class MeatConfigPage {
   setDesiredTemp() {
     let meatTemp: number = this.meat;
     this.storage.set('meatTemp', meatTemp);
-    console.info(`Desired Grill Temp: ${meatTemp}`);
+    console.info(`Desired Meat Temp: ${meatTemp}`);
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad GrillConfigPage');
+    console.log('ionViewDidLoad MeatConfigPage');
   }
   
 }

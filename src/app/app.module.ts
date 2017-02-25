@@ -5,8 +5,7 @@ import { MyApp } from './app.component';
 import { ProbesPage } from '../pages/probes/probes';
 import { TabsPage } from '../pages/tabs/tabs';
 import { GrillConfigPage } from '../pages/probes/grill-config/grill-config';
-import { ToolsPage } from '../pages/tools/tools';
-import { GraphPage } from '../pages/tools/graph/graph';
+import { GraphPage } from '../pages/graph/graph';
 import { ChartModule } from 'angular2-highcharts';
 import { ProgressbarModule } from 'ng2-bootstrap';
 import { MqttModule, MqttService } from 'angular2-mqtt';
@@ -34,7 +33,6 @@ export function mqttServiceFactory() {
     TabsPage,
     GrillConfigPage,
     MeatConfigPage,
-    ToolsPage,
     GraphPage
   ],
   imports: [
@@ -53,7 +51,6 @@ export function mqttServiceFactory() {
     TabsPage,
     GrillConfigPage,
     MeatConfigPage,
-    ToolsPage,
     GraphPage
   ],
   providers: [

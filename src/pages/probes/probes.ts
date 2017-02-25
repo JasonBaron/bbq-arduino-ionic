@@ -12,28 +12,26 @@ const TOPIC: string = 'test';
   templateUrl: 'probes.html'
 })
 export class ProbesPage {
-  public hideGrillProgressbar: boolean;
-  public hideMeatProgressbar: boolean;
-  public pushGrillConfigPage;
-  public pushMeatConfigPage;
-  public currentProbe1Temp;
-  public desiredProbe1Temp;
-  public currentProbe2Temp;
-  public desiredProbe2Temp;
+  public grill: Object;
+  public meat: Object;
 
   constructor(
     public navCtrl: NavController,
     public storage: Storage,
     public mqtt: MqttService
   ) {
-    this.pushGrillConfigPage = GrillConfigPage;
-    this.pushMeatConfigPage = MeatConfigPage;
-    this.hideGrillProgressbar = true;
-    this.hideMeatProgressbar = true;
-    this.currentProbe1Temp = 0;
-    this.desiredProbe1Temp = 0;
-    this.currentProbe2Temp = 0;
-    this.desiredProbe2Temp = 0;
+    this.grill = {
+      desired: 0,
+      current: 0,
+      hideProgressbar: true,
+      configPage: GrillConfigPage
+    };
+    this.meat = {
+      desired: 0,
+      current: 0,
+      hideProgressbar: true,
+      configPage: MeatConfigPage
+    };
   }
 
   stop() {
@@ -41,7 +39,9 @@ export class ProbesPage {
       killswitch: true,
       timeToCheck: 5
     });
-    this.mqtt.publish(TOPIC, jsonMsg).subscribe((error) => {
+    this.mqtt.publish(TOPIC, jsonMsg, {
+      retain: true
+    }).subscribe((error) => {
       console.warn(error);
     });
   }
@@ -72,16 +72,23 @@ export class ProbesPage {
       grillTemp: grillTemp,
       meatTemp: meatTemp
     });
-    this.mqtt.publish(TOPIC, jsonMsg).subscribe((error) => {
+    this.mqtt.publish(TOPIC, jsonMsg, {
+      retain: false
+    }).subscribe((error) => {
       console.warn(error);
     });
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad ProbesPage');
+  clear() {
     this.storage.clear().catch((error) => {
       console.warn(error);
     });
+    this.grill['hideProgressbar'] = true;
+    this.meat['hideProgressbar'] = true;
+  }
+
+  ionViewDidLoad() {
+    console.log('ionViewDidLoad ProbesPage');
     this.mqtt.observe(TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {
@@ -90,10 +97,10 @@ export class ProbesPage {
             if (jsonMsg.hasOwnProperty('timeRecorded')) {
               if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
                 if (jsonMsg.hasOwnProperty('grillTempRecorded')) {
-                  this.currentProbe1Temp = jsonMsg['grillTempRecorded'];
+                  this.grill['current'] = jsonMsg['grillTempRecorded'];
                 }
                 if (jsonMsg.hasOwnProperty('meatTempRecorded')) {
-                  this.currentProbe2Temp = jsonMsg['meatTempRecorded'];
+                  this.meat['current'] = jsonMsg['meatTempRecorded'];
                 }
               }
             }
@@ -111,14 +118,14 @@ export class ProbesPage {
   ionViewDidEnter() {
     this.storage.get('grillTemp').then((val) => {
       if (val) {
-        this.hideGrillProgressbar = false;
-        this.desiredProbe1Temp = val;
+        this.grill['hideProgressbar'] = false;
+        this.grill['desired'] = val;
       }
     });
     this.storage.get('meatTemp').then((val) => {
       if (val) {
-        this.hideMeatProgressbar = false;
-        this.desiredProbe2Temp = val;
+        this.meat['hideProgressbar'] = false;
+        this.meat['desired'] = val;
       }
     });
   }

@@ -13,7 +13,7 @@
         <h1 style="margin-bottom: 20px;">Grill</h1>
       </ion-col>
       <ion-col padding-right text-right>
-        <button ion-button clear large class="probeHeaderBtn" [navPush]="pushGrillConfigPage">
+        <button ion-button clear large class="probeHeaderBtn" [navPush]="grill['configPage']">
             <h3 style="margin-top: 10px;">Set</h3>
         </button>
       </ion-col>
@@ -23,25 +23,23 @@
       <ion-col>
         <h2>
           <ion-icon name="thermometer"></ion-icon>
-          Temperature: {{ currentProbe1Temp }}&deg;F
+          {{ grill['current'] }}&deg;F
         </h2>
       </ion-col>
     </ion-row>
 
     <ion-row>
       <ion-col>
-        <progressbar [hidden]="hideGrillProgressbar" class="progress" [max]="desiredProbe1Temp" [value]="currentProbe1Temp"></progressbar>
+        <progressbar [hidden]="grill['hideProgressbar']" class="progress" [max]="grill['desired']" [value]="grill['current']"></progressbar>
       </ion-col>
     </ion-row>
-
-    <!-- |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| -->
 
     <ion-row class="probeHeader" center>
       <ion-col padding-left text-left>
         <h1 style="margin-bottom: 20px;">Meat</h1>
       </ion-col>
       <ion-col padding-right text-right>
-        <button ion-button clear large class="probeHeaderBtn" [navPush]="pushMeatConfigPage">
+        <button ion-button clear large class="probeHeaderBtn" [navPush]="meat['configPage']">
             <h3 style="margin-top: 10px;">Set</h3>
         </button>
       </ion-col>
@@ -51,26 +49,27 @@
       <ion-col>
         <h2>
           <ion-icon name="thermometer"></ion-icon>
-          Temperature: {{ currentProbe2Temp }}&deg;F
+          {{ meat['current'] }}&deg;F
         </h2>
       </ion-col>
     </ion-row>
 
     <ion-row>
       <ion-col>
-        <progressbar [hidden]="hideMeatProgressbar" class="progress" [max]="desiredProbe2Temp" [value]="currentProbe2Temp"></progressbar>
+        <progressbar [hidden]="meat['hideProgressbar']" class="progress" [max]="meat['desired']" [value]="meat['current']"></progressbar>
       </ion-col>
     </ion-row>
 
     <ion-row>
       <ion-col>
+        <button ion-button (click)="start()">
+          Start
+        </button>
         <button ion-button (click)="stop()">
           Stop
         </button>
-      </ion-col>
-      <ion-col>
-        <button ion-button (click)="start()">
-          Start
+        <button ion-button (click)="clear()">
+          Clear
         </button>
       </ion-col>
     </ion-row>
