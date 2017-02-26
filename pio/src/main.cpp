@@ -1,16 +1,12 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include "functions.h"
-// #include <SparkFunHTU21D.h>
 #include <TimeLib.h>
 
 #define out_topic "sensor/grill"
 #define test_topic "test"
 #define fan_pin 15
 
-// HTU21D sensor;
-// float sensorTempC;
-// float sensorTempF;
 float sensorGrillF;
 float sensorMeatF;
 long previousTime = 0;
@@ -21,9 +17,9 @@ void send(float meatSensor, float grillSensor, long timeRecorded);
 void setup() {
   Serial.begin(115200);
   Serial.println();
+  setup_display();
   setup_wifi();
   setup_mqtt();
-  // sensor.begin();
   pinMode(fan_pin, OUTPUT);
 }
 
@@ -37,11 +33,9 @@ void loop() {
     previousTime = currentTime;
     if(timeStatus() == timeSet) {
       if(!config.killswitch) {
-        // sensorTempC = sensor.readTemperature(); // Blynk on-board sensor
         sensorGrillF = grillSensor.readFarenheit(); // Adafruit MAX31855 grill
         sensorMeatF = meatSensor.readFarenheit(); // Adafruit MAX31855 meat
         long timeTaken = now();
-        // sensorTempF = (sensorTempC * (9.0 / 5.0)) + 32.0;
         send(sensorMeatF, sensorGrillF, timeTaken);
 
         if(sensorGrillF <= config.grillTemp) {
@@ -79,6 +73,12 @@ void loop() {
 void send(float meatSensor, float grillSensor, long timeRecorded) {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer2;
   JsonObject& object = jsonBuffer2.createObject();
+  if(isnan(meatSensor)) {
+    meatSensor = 0;
+  }
+  if(isnan(grillSensor)) {
+    grillSensor = 0;
+  }
   object["meatTempRecorded"] = meatSensor;
   object["grillTempRecorded"] = grillSensor;
   object["timeRecorded"] = timeRecorded;

@@ -18,3 +18,4 @@ void callback(char* topic, byte* payload, unsigned int length);
 void setup_mqtt();
 void reconnect();
 void setup_wifi();
+void setup_display();

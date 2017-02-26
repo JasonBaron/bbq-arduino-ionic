@@ -1,5 +1,4 @@
 #include <Arduino.h>
-
 #include "functions.h"
 #include <SPI.h>
 #include <Adafruit_MAX31855.h>

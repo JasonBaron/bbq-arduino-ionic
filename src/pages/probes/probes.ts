@@ -84,7 +84,9 @@ export class ProbesPage {
       console.warn(error);
     });
     this.grill['hideProgressbar'] = true;
+    this.grill['current'] = 0;
     this.meat['hideProgressbar'] = true;
+    this.meat['current'] = 0;
   }
 
   ionViewDidLoad() {
