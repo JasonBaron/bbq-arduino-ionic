@@ -14,6 +14,7 @@ const TOPIC: string = 'test';
 export class ProbesPage {
   public grill: Object;
   public meat: Object;
+  public timeUntilCheck: any;
   public status: string;
 
   constructor(
@@ -33,6 +34,14 @@ export class ProbesPage {
       hideProgressbar: true,
       configPage: MeatConfigPage
     };
+    this.timeUntilCheck = 5;
+  }
+
+  setTimeToCheck() {
+    let timeToCheck: number = this.timeUntilCheck;
+    this.storage.set('timeToCheck', timeToCheck);
+    this.storage.set('timeToCheckValid', true);
+    console.info(`Desired Time To Check: ${timeToCheck}`);
   }
 
   stop() {
@@ -42,39 +51,56 @@ export class ProbesPage {
     });
     this.mqtt.publish(TOPIC, jsonMsg, {
       retain: true
-    }).subscribe((error) => {
-      console.warn(error);
-    });
-    this.status = "Not running";
+    }).subscribe(
+      v => console.log(v),
+      e => console.warn(e),
+      () => {
+        this.status = "Not running";
+      }
+    );
   }
 
   start() {
+    debugger;
+    this.storage.get('timeToCheckValid').then((timeToCheckValidValue) => console.log(timeToCheckValidValue));
+
     this.storage.get('grillTempValid').then((grillTempValidValue) => {
       this.storage.get('meatTempValid').then((meatTempValidValue) => {
-        if (grillTempValidValue && meatTempValidValue) {
-          this.storage.get('grillTemp').then((grillTempValue) => {
-            this.storage.get('meatTemp').then((meatTempValue) => {
-              // this.storage.get('timeToCheck').then((timeToCheckValue) => {
-                let jsonMsg = JSON.stringify({
-                  killswitch: false,
-                  timeToCheck: 5,
-                  grillTemp: grillTempValue,
-                  meatTemp: meatTempValue
+        this.storage.get('timeToCheckValid').then((timeToCheckValidValue) => {
+
+          if (grillTempValidValue && meatTempValidValue && timeToCheckValidValue) {
+
+            this.storage.get('grillTemp').then((grillTempValue) => {
+              this.storage.get('meatTemp').then((meatTempValue) => {
+                this.storage.get('timeToCheck').then((timeToCheckValue) => {
+
+                  let jsonMsg = JSON.stringify({
+                    killswitch: false,
+                    timeToCheck: timeToCheckValue,
+                    grillTemp: grillTempValue,
+                    meatTemp: meatTempValue
+                  });
+                  this.mqtt.publish(TOPIC, jsonMsg, {
+                    retain: false
+                  }).subscribe(
+                    v => console.log(v),
+                    e => console.warn(e),
+                    () => {
+                      this.status = "Running";
+                    }
+                  );
+
                 });
-                this.mqtt.publish(TOPIC, jsonMsg, {
-                  retain: false
-                }).subscribe((error) => {
-                  console.warn(error);
-                });
-              // });
+              });
             });
-          });
-        } else {
-          console.warn("Invalid submission");
-        }
+
+          } else {
+            console.warn("Invalid submission");
+            this.status = "Not running";
+          }
+
+        });
       });
-    }).then(() => {
-      this.status = "Running";
     });
   }
 
@@ -84,6 +110,7 @@ export class ProbesPage {
     });
     this.storage.set('grillTempValid', false);
     this.storage.set('meatTempValid', false);
+    this.storage.set('timeToCheckValid', false);
     this.grill['hideProgressbar'] = true;
     this.grill['current'] = 0;
     this.meat['hideProgressbar'] = true;
@@ -118,21 +145,18 @@ export class ProbesPage {
     );
     this.storage.set('grillTempValid', false);
     this.storage.set('meatTempValid', false);
+    this.storage.set('timeToCheckValid', false);
     this.status = "Not running";
   }
 
   ionViewDidEnter() {
-    this.storage.get('grillTemp').then((val) => {
-      if (val) {
-        this.grill['hideProgressbar'] = false;
-        this.grill['desired'] = val;
-      }
-    });
-    this.storage.get('meatTemp').then((val) => {
-      if (val) {
+    this.storage.get('grillTemp').then(grillTempVal => {
+      this.storage.get('meatTemp').then(meatTempVal => {
         this.meat['hideProgressbar'] = false;
-        this.meat['desired'] = val;
-      }
+        this.grill['hideProgressbar'] = false;
+        this.meat['desired'] = meatTempVal;
+        this.grill['desired'] = grillTempVal;
+      });
     });
   }
 }
