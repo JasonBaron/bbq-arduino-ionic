@@ -14,7 +14,7 @@ const TOPIC: string = 'test';
 export class ProbesPage {
   public grill: Object;
   public meat: Object;
-  public timeUntilCheck: any;
+  public check: Object;
   public status: string;
 
   constructor(
@@ -34,14 +34,15 @@ export class ProbesPage {
       hideProgressbar: true,
       configPage: MeatConfigPage
     };
-    this.timeUntilCheck = 5;
+    this.check = {
+      timeToCheck: 5
+    };
   }
 
   setTimeToCheck() {
-    let timeToCheck: number = this.timeUntilCheck;
-    this.storage.set('timeToCheck', timeToCheck);
-    this.storage.set('timeToCheckValid', true);
-    console.info(`Desired Time To Check: ${timeToCheck}`);
+    console.log(this.check['time']);
+    this.check['timeToCheck'] = this.check['time'];
+    console.info(`Desired Time To Check: ${this.check['timeToCheck']}`);
   }
 
   stop() {
@@ -66,17 +67,15 @@ export class ProbesPage {
 
     this.storage.get('grillTempValid').then((grillTempValidValue) => {
       this.storage.get('meatTempValid').then((meatTempValidValue) => {
-        this.storage.get('timeToCheckValid').then((timeToCheckValidValue) => {
 
-          if (grillTempValidValue && meatTempValidValue && timeToCheckValidValue) {
+          if (grillTempValidValue && meatTempValidValue) {
 
             this.storage.get('grillTemp').then((grillTempValue) => {
               this.storage.get('meatTemp').then((meatTempValue) => {
-                this.storage.get('timeToCheck').then((timeToCheckValue) => {
 
                   let jsonMsg = JSON.stringify({
                     killswitch: false,
-                    timeToCheck: timeToCheckValue,
+                    timeToCheck: this.check['timeToCheck'],
                     grillTemp: grillTempValue,
                     meatTemp: meatTempValue
                   });
@@ -90,7 +89,6 @@ export class ProbesPage {
                     }
                   );
 
-                });
               });
             });
 
@@ -99,7 +97,6 @@ export class ProbesPage {
             this.status = "Not running";
           }
 
-        });
       });
     });
   }
@@ -110,7 +107,7 @@ export class ProbesPage {
     });
     this.storage.set('grillTempValid', false);
     this.storage.set('meatTempValid', false);
-    this.storage.set('timeToCheckValid', false);
+    this.check['timeToCheck'] = 5;
     this.grill['hideProgressbar'] = true;
     this.grill['current'] = 0;
     this.meat['hideProgressbar'] = true;
@@ -145,7 +142,6 @@ export class ProbesPage {
     );
     this.storage.set('grillTempValid', false);
     this.storage.set('meatTempValid', false);
-    this.storage.set('timeToCheckValid', false);
     this.status = "Not running";
   }
 
