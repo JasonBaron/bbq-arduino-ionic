@@ -19,6 +19,7 @@ export class MeatConfigPage {
   setDesiredTemp() {
     let meatTemp: number = this.meat;
     this.storage.set('meatTemp', meatTemp);
+    this.storage.set('meatTempValid', true);
     console.info(`Desired Meat Temp: ${meatTemp}`);
   }
 

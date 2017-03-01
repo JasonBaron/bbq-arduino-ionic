@@ -29,6 +29,7 @@ export class GrillConfigPage {
       grillTemp = parseInt(this.beef);
     }
     this.storage.set('grillTemp', grillTemp);
+    this.storage.set('grillTempValid', true);
     console.info(`Desired Grill Temp: ${grillTemp}`);
   }
 

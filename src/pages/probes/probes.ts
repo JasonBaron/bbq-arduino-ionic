@@ -14,6 +14,7 @@ const TOPIC: string = 'test';
 export class ProbesPage {
   public grill: Object;
   public meat: Object;
+  public status: string;
 
   constructor(
     public navCtrl: NavController,
@@ -44,38 +45,36 @@ export class ProbesPage {
     }).subscribe((error) => {
       console.warn(error);
     });
+    this.status = "Not running";
   }
 
   start() {
-    let timeToCheck: number;
-    let grillTemp: number;
-    let meatTemp: number;
-
-    this.storage.get('grillTemp').then(
-      (val) => {
-        grillTemp = val;
-      }
-    );
-    this.storage.get('meatTemp').then(
-      (val) => {
-        meatTemp = val;
-      }
-    );
-    this.storage.get('timeToCheck').then(
-      (val) => {
-        timeToCheck = val;
-      }
-    );
-    let jsonMsg = JSON.stringify({
-      killswitch: false,
-      timeToCheck: timeToCheck,
-      grillTemp: grillTemp,
-      meatTemp: meatTemp
-    });
-    this.mqtt.publish(TOPIC, jsonMsg, {
-      retain: false
-    }).subscribe((error) => {
-      console.warn(error);
+    this.storage.get('grillTempValid').then((grillTempValidValue) => {
+      this.storage.get('meatTempValid').then((meatTempValidValue) => {
+        if (grillTempValidValue && meatTempValidValue) {
+          this.storage.get('grillTemp').then((grillTempValue) => {
+            this.storage.get('meatTemp').then((meatTempValue) => {
+              // this.storage.get('timeToCheck').then((timeToCheckValue) => {
+                let jsonMsg = JSON.stringify({
+                  killswitch: false,
+                  timeToCheck: 5,
+                  grillTemp: grillTempValue,
+                  meatTemp: meatTempValue
+                });
+                this.mqtt.publish(TOPIC, jsonMsg, {
+                  retain: false
+                }).subscribe((error) => {
+                  console.warn(error);
+                });
+              // });
+            });
+          });
+        } else {
+          console.warn("Invalid submission");
+        }
+      });
+    }).then(() => {
+      this.status = "Running";
     });
   }
 
@@ -83,6 +82,8 @@ export class ProbesPage {
     this.storage.clear().catch((error) => {
       console.warn(error);
     });
+    this.storage.set('grillTempValid', false);
+    this.storage.set('meatTempValid', false);
     this.grill['hideProgressbar'] = true;
     this.grill['current'] = 0;
     this.meat['hideProgressbar'] = true;
@@ -108,13 +109,16 @@ export class ProbesPage {
             }
           }
         } catch (e) {
-          console.warn(e);
+          console.warn("JSON cannot be parsed!");
         }
       },
       (error) => {
         console.error(error);
       }
     );
+    this.storage.set('grillTempValid', false);
+    this.storage.set('meatTempValid', false);
+    this.status = "Not running";
   }
 
   ionViewDidEnter() {
