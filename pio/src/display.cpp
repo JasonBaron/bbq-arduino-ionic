@@ -20,13 +20,13 @@ void setup_display(char* msg) {
 
 void temp_display(float meatSensor, float grillSensor) {
 
-  display.print((char*)"Temperatures", 2);
+  display.print((char*)"Temperatures", 3);
   char temp1[25];
   char arraystr1[25];
   dtostrf(meatSensor, 3, 1, temp1);
   sprintf(arraystr1,"Meat  %s", temp1);
-  display.print((char*)arraystr1, 4);
+  display.print((char*)arraystr1, 5);
   dtostrf(grillSensor, 3, 1, temp1);
   sprintf(arraystr1,"Grill %s", temp1);
-  display.print((char*)arraystr1, 5);
+  display.print((char*)arraystr1, 6);
 }
