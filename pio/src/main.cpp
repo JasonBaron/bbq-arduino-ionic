@@ -17,12 +17,10 @@ void send(float meatSensor, float grillSensor, long timeRecorded);
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  init_display();
-  setup_display((char*)"BBQ starting...");
+  setup_display();
   setup_wifi();
   setup_mqtt();
   pinMode(fan_pin, OUTPUT);
-  setup_display((char*)"BBQ connected! ");
 }
 
 void loop() {
@@ -39,12 +37,8 @@ void loop() {
         sensorMeatF = meatSensor.readFarenheit(); // Adafruit MAX31855 meat
         long timeTaken = now();
         send(sensorMeatF, sensorGrillF, timeTaken);
-        Serial.println("Grill: ");
-        Serial.println(sensorGrillF);
-        Serial.println("Meat: ");
-        Serial.println(sensorMeatF);
+
         if(sensorGrillF <= config.grillTemp) {
-          setup_display((char*)"Recording...   ");
           float diff = config.grillTemp - sensorGrillF;
           if(diff >= 0 && diff < 5) {
             analogWrite(fan_pin, 0); // 0%
@@ -66,7 +60,6 @@ void loop() {
 
         if(sensorMeatF >= config.meatTemp) {
           Serial.println("Meat is done!");
-          setup_display((char*)"Meat done!     ");
           config.killswitch = true;
         }
       } else {
@@ -80,8 +73,6 @@ void loop() {
 void send(float meatSensor, float grillSensor, long timeRecorded) {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer2;
   JsonObject& object = jsonBuffer2.createObject();
-  float meat;
-  float grill;
   if(isnan(meatSensor)) {
     meatSensor = 0;
   }
@@ -95,11 +86,6 @@ void send(float meatSensor, float grillSensor, long timeRecorded) {
   size_t objSize = objLen + 1;
   char jsonPayload[objSize];
   object.printTo(jsonPayload, objSize);
-
-  meat = meatSensor;
-  grill = grillSensor;
-  temp_display(meat, grill);
-
   if(!client.publish(test_topic, jsonPayload, objLen)) {
     Serial.print("Failed to publish: ");
     Serial.print(jsonPayload);

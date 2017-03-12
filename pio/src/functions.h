@@ -18,6 +18,4 @@ void callback(char* topic, byte* payload, unsigned int length);
 void setup_mqtt();
 void reconnect();
 void setup_wifi();
-void init_display();
-void setup_display(char* msg);
-void temp_display(float meatSensor, float grillSensor);
+void setup_display();
