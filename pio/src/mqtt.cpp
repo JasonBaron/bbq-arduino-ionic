@@ -13,7 +13,7 @@
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-Configs config = { 0, 0, 5, true };
+Configs config = { 0, 0, 5, false };
 
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(4) + JSON_ARRAY_SIZE(0);
 
