@@ -1,17 +1,32 @@
 #include <Arduino.h>
 #include "functions.h"
 #include <Wire.h>
-#include "SSD1306.h"
+#include "OLED.h"
 
 #define addr 0x3c
-#define sda 0
-#define scl 2
+#define sda 0 //D3
+#define scl 2 //D4
 
-SSD1306 display(addr, sda, scl);
+OLED display(sda, scl);
 
-void setup_display() {
-  // Initialising the UI will init the display too.
-  display.init();
-  display.flipScreenVertically();
-  display.setFont(ArialMT_Plain_16);
+void init_display() {
+    display.begin();
+}
+void setup_display(char* msg) {
+// Initialize display
+  display.print((char*)msg, 1);
+  delay(3*1000);
+}
+
+void temp_display(float meatSensor, float grillSensor) {
+
+  display.print((char*)"Temperatures", 3);
+  char temp1[25];
+  char arraystr1[25];
+  dtostrf(meatSensor, 3, 1, temp1);
+  sprintf(arraystr1,"Meat  %s", temp1);
+  display.print((char*)arraystr1, 5);
+  dtostrf(grillSensor, 3, 1, temp1);
+  sprintf(arraystr1,"Grill %s", temp1);
+  display.print((char*)arraystr1, 6);
 }
