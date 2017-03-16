@@ -40,9 +40,8 @@ export class ProbesPage {
   }
 
   setTimeToCheck() {
-    console.log(this.check['time']);
-    this.check['timeToCheck'] = this.check['time'];
     console.info(`Desired Time To Check: ${this.check['timeToCheck']}`);
+    this.storage.set('timeToCheck', +this.check['timeToCheck']);
   }
 
   stop() {
@@ -112,6 +111,7 @@ export class ProbesPage {
     this.grill['current'] = 0;
     this.meat['hideProgressbar'] = true;
     this.meat['current'] = 0;
+    this.check['timeToCheck'] = 5;
   }
 
   ionViewDidLoad() {
