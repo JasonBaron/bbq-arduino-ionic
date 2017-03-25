@@ -2,14 +2,19 @@ import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { IonicStorageModule } from '@ionic/storage';
 import { MyApp } from './app.component';
-import { ProbesPage } from '../pages/probes/probes';
+
 import { TabsPage } from '../pages/tabs/tabs';
+import { ProbesPage } from '../pages/probes/probes';
 import { GrillConfigPage } from '../pages/probes/grill-config/grill-config';
+import { MeatConfigPage } from '../pages/probes/meat-config/meat-config';
 import { GraphPage } from '../pages/graph/graph';
+
 import { ChartModule } from 'angular2-highcharts';
 import { ProgressbarModule } from 'ng2-bootstrap';
 import { MqttModule, MqttService } from 'angular2-mqtt';
-import { MeatConfigPage } from '../pages/probes/meat-config/meat-config';
+
+import { StatusBar } from '@ionic-native/status-bar';
+import { SplashScreen } from '@ionic-native/splash-screen';
 
 export function mqttServiceFactory() {
   return new MqttService({
@@ -54,6 +59,8 @@ export function mqttServiceFactory() {
     GraphPage
   ],
   providers: [
+    StatusBar,
+    SplashScreen,
       {
         provide: ErrorHandler, useClass: IonicErrorHandler
       }

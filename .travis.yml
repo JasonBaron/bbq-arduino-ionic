@@ -4,7 +4,7 @@ node_js:
 install:
   - npm install
 script:
-  - npm run ionic:build
+  - npm run test
 branches:
   except:
     - master
