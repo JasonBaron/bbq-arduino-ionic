@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/mdwagner/bbq-arduino-ionic.svg?branch=develop)](https://travis-ci.org/mdwagner/bbq-arduino-ionic)
 # bbq-arduino-ionic
 An Ionic 2 app that communicates with an Arduino board via MQTT, to monitor the temperature on a charcoal grill and adjust with fans.
 
