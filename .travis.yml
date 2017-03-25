@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - "6.9.4"
+before_install:
+  - cd ionic
+install:
+  - npm install
+script:
+  - npm run ionic:build
+branches:
+  only:
+    - ionic_dev

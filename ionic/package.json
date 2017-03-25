@@ -2,7 +2,7 @@
   "name": "bbq-arduino",
   "author": "mdwagner",
   "homepage": "https://github.com/mdwagner/bbq-arduino",
-  "private": true,
+  "private": false,
   "scripts": {
     "clean": "./node_modules/.bin/ionic-app-scripts clean",
     "build": "./node_modules/.bin/ionic-app-scripts build",
