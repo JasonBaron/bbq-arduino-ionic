@@ -8,7 +8,7 @@
     "build": "./node_modules/.bin/ionic-app-scripts build",
     "ionic:build": "./node_modules/.bin/ionic-app-scripts build",
     "ionic:serve": "./node_modules/.bin/ionic-app-scripts serve",
-    "test": "./node_modules/.bin/karma start ./test-config/karma.conf.js"
+    "test": "./node_modules/.bin/karma start ./test-config/karma.conf.js --browsers Chrome --single-run"
   },
   "dependencies": {
     "@angular/common": "2.4.8",
