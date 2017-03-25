@@ -1,10 +1,16 @@
 language: node_js
 node_js:
-  - "6.9.4"
+  - "6"
 install:
   - npm install
 script:
   - npm run ionic:build
 branches:
-  only:
-    - develop
+  except:
+    - master
+notifications:
+  email:
+    recipients:
+      - mdwranger@gmail.com
+    on_success: never
+    on_failure: always
