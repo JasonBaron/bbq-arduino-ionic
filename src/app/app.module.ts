@@ -1,6 +1,6 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
-import { Storage } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage';
 import { MyApp } from './app.component';
 import { ProbesPage } from '../pages/probes/probes';
 import { TabsPage } from '../pages/tabs/tabs';
@@ -10,10 +10,6 @@ import { ChartModule } from 'angular2-highcharts';
 import { ProgressbarModule } from 'ng2-bootstrap';
 import { MqttModule, MqttService } from 'angular2-mqtt';
 import { MeatConfigPage } from '../pages/probes/meat-config/meat-config';
-
-export function provideStorage() {
-  return new Storage(['localstorage', 'indexeddb', 'websql'], { name: '__mydb' });
-}
 
 export function mqttServiceFactory() {
   return new MqttService({
@@ -37,6 +33,10 @@ export function mqttServiceFactory() {
   ],
   imports: [
     IonicModule.forRoot(MyApp),
+    IonicStorageModule.forRoot({
+      name: '__mydb',
+      driverOrder: ['localstorage', 'indexeddb', 'websql']
+    }),
     ChartModule,
     ProgressbarModule.forRoot(),
     MqttModule.forRoot({
@@ -56,9 +56,6 @@ export function mqttServiceFactory() {
   providers: [
       {
         provide: ErrorHandler, useClass: IonicErrorHandler
-      },
-      {
-        provide: Storage, useFactory: provideStorage
       }
     ]
   })
