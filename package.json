@@ -4,11 +4,11 @@
   "homepage": "https://github.com/mdwagner/bbq-arduino",
   "private": false,
   "scripts": {
-    "ionic:clean": "./node_modules/.bin/ionic-app-scripts clean",
+    "clean": "./node_modules/.bin/ionic-app-scripts clean",
+    "build": "./node_modules/.bin/ionic-app-scripts build",
     "ionic:build": "./node_modules/.bin/ionic-app-scripts build",
     "ionic:serve": "./node_modules/.bin/ionic-app-scripts serve",
-    "test": "./node_modules/.bin/karma start ./test-config/karma.conf.js --single-run",
-    "test:local": "./node_modules/.bin/karma start ./test-config/karma.conf.js --browsers Chrome --single-run"
+    "test": "./node_modules/.bin/karma start ./test-config/karma.conf.js"
   },
   "dependencies": {
     "@angular/common": "2.4.8",

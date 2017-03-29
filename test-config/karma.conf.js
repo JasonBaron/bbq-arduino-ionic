@@ -7,18 +7,11 @@ module.exports = function (config) {
     frameworks: ['jasmine'],
 
     files: [
-      { pattern: './karma-test-shim.js', watched: true }
+      {pattern: './karma-test-shim.js', watched: true}
     ],
 
     preprocessors: {
       './karma-test-shim.js': ['webpack', 'sourcemap']
-    },
-
-    customLaunchers: {
-      Chrome_travis_ci: {
-        base: 'Chrome',
-        flags: ['--no-sandbox']
-      }
     },
 
     webpack: webpackConfig,
@@ -40,12 +33,11 @@ module.exports = function (config) {
     reporters: ['kjhtml', 'dots'],
     port: 9876,
     colors: true,
-    logLevel: config.LOG_INFO
+    logLevel: config.LOG_INFO,
+    autoWatch: true,
+    browsers: ['Chrome'],
+    singleRun: false
   };
-
-  if (process.env.TRAVIS) {
-    config.browsers = ['Chrome_travis_ci'];
-  }
 
   config.set(_config);
 };
