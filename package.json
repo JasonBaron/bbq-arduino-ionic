@@ -36,6 +36,8 @@
   },
   "devDependencies": {
     "@ionic/app-scripts": "1.1.4",
+    "appium": "^1.6.3",
+    "appium-doctor": "^1.4.2",
     "typescript": "2.0.9"
   },
   "cordovaPlugins": [
