@@ -1,10 +1,22 @@
-language: node_js
-node_js:
-  - "6"
+sudo: false
+language: android
+android:
+  components:
+    - tools
+    - build-tools-$BUILD_TOOLS_VERSION
+    - platform-tools
+    - android-$ANDROID_VERSION
+jdk:
+  - oraclejdk8
+before_install:
+  - . $HOME/.nvm/nvm.sh
+  - nvm install $NODE_VERSION
+  - node --version
 install:
+  - npm install -g ionic cordova
   - npm install
 script:
-  - npm run ionic:build
+  - bash build_app.sh
 branches:
   except:
     - master
