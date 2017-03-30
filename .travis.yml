@@ -7,7 +7,7 @@ android:
     - platform-tools
     - android-$ANDROID_VERSION
 jdk:
-  - oraclejdk$JDK_VERSION
+  - oraclejdk8
 before_install:
   - . $HOME/.nvm/nvm.sh
   - nvm install $NODE_VERSION
