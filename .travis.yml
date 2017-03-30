@@ -4,7 +4,7 @@ jdk:
   - oraclejdk8
 before_install:
   - . $HOME/.nvm/nvm.sh
-  - nvm install lts/boron
+  - nvm install 6
   - node --version
 install:
   - npm install -g ionic
