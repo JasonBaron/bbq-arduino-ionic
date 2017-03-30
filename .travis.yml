@@ -3,14 +3,14 @@ language: android
 android:
   components:
     - tools
-    - build-tools-25.0.2
+    - build-tools-$BUILD_TOOLS_VERSION
     - platform-tools
-    - android-25
+    - android-$ANDROID_VERSION
 jdk:
-  - oraclejdk8
+  - oraclejdk$JDK_VERSION
 before_install:
   - . $HOME/.nvm/nvm.sh
-  - nvm install 6
+  - nvm install $NODE_VERSION
   - node --version
 install:
   - npm install -g ionic cordova
