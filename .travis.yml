@@ -1,16 +1,13 @@
 sudo: false
 language: android
-node_js:
-  - "6"
 jdk:
   - oraclejdk8
 before_install:
-  - wget https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh -O ~/.nvm/nvm.sh
-  - source ~/.nvm/nvm.sh
+  - . $HOME/.nvm/nvm.sh
   - nvm install lts/boron
   - node --version
-  - npm install -g ionic
 install:
+  - npm install -g ionic
   - npm install
 script:
   - ionic platform add android
