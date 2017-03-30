@@ -1,5 +1,9 @@
 sudo: false
 language: android
+android:
+  components:
+    - platform-tools
+    - tools
 jdk:
   - oraclejdk8
 before_install:
@@ -10,9 +14,7 @@ install:
   - npm install -g ionic cordova
   - npm install
 script:
-  - npm run ionic:build
-  - ionic platform add android
-  - ionic build android
+  - bash build_app.sh
 branches:
   except:
     - master
