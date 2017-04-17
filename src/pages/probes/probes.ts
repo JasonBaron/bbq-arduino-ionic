@@ -61,9 +61,6 @@ export class ProbesPage {
   }
 
   start() {
-    debugger;
-    this.storage.get('timeToCheckValid').then((timeToCheckValidValue) => console.log(timeToCheckValidValue));
-
     this.storage.get('grillTempValid').then((grillTempValidValue) => {
       this.storage.get('meatTempValid').then((meatTempValidValue) => {
 
