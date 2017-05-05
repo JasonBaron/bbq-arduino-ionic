@@ -6,15 +6,15 @@ LABEL author="mdwagner"
 LABEL repo="https://github.com/mdwagner/bbq-arduino"
 
 ENV ANDROID_HOME=/opt/android-sdk-linux \
-    # NODE_VERSION=6.9.4 \
-    # NPM_VERSION=3.10.10 \
     IONIC_VERSION=2.2.0 \
     CORDOVA_VERSION=6.4.0 \
     PROJECT_PATH=/project/bbq-arduino-ionic \
     GIT_BRANCH=develop
 
 # Install basic packages
-# RUN apk-install git wget curl unzip build-base tar
+RUN apt-get update && \
+    apt-get install -y git wget curl unzip build-essential tar --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 # RUN apk-install nodejs
 
 # Install Nodejs
@@ -28,24 +28,25 @@ RUN npm install -g ionic@"$IONIC_VERSION"
 RUN npm cache clear
 
 # Install Java JDK
-# RUN apk-install openjdk8-jre-base
+RUN apt-get update && \
+    apt-get install -y default-jdk --no-install-recommends
 
 # Instal Android SDK
-# RUN ANDROID_HOME="${ANDROID_HOME}" >> /etc/environment && \
-#     mkdir /opt && \
-#     cd /opt && \
-#     wget --output-document=android-sdk.tgz --quiet http://dl.google.com/android/android-sdk_r24.4.1-linux.tgz && \
-#     tar -xzf android-sdk.tgz && \
-#     rm -f android-sdk.tgz && \
-#     chown -R root. /opt
+RUN ANDROID_HOME="${ANDROID_HOME}" >> /etc/environment && \
+    # mkdir /opt && \
+    cd /opt && \
+    wget --output-document=android-sdk.tgz --quiet http://dl.google.com/android/android-sdk_r24.4.1-linux.tgz && \
+    tar -xzf android-sdk.tgz && \
+    rm -f android-sdk.tgz && \
+    chown -R root. /opt
 
 # Set Path
-# ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:/opt/tools
+ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:/opt/tools
 
 # Install Android SDK Elements
-# COPY sh /opt/tools
-# RUN ["/opt/tools/android-accept-licenses.sh", "android update sdk --all --no-ui --filter platform-tools,tools,build-tools-24.0.2,android-24,android-23,android-22,android-19,android-21,extra-android-support,extra-android-m2repository,extra-google-m2repository"]
-# RUN unzip ${ANDROID_HOME}/temp/*.zip -d ${ANDROID_HOME}
+COPY sh /opt/tools
+RUN ["sudo /opt/tools/android-accept-licenses.sh", "android update sdk --all --no-ui --filter platform-tools,tools,build-tools-24.0.2,android-24,android-23,android-22,android-19,android-21,extra-android-support,extra-android-m2repository,extra-google-m2repository"]
+RUN unzip ${ANDROID_HOME}/temp/*.zip -d ${ANDROID_HOME}
 # RUN apk --no-cache add git
 # RUN apt-get update && apt-get install -y git --no-install-recommends NEED TO REMOVE PACKAGES AFTER INSTALL
 RUN git clone https://github.com/mdwagner/bbq-arduino-ionic.git $PROJECT_PATH
@@ -54,7 +55,7 @@ RUN chown -R $(whoami) $PROJECT_PATH
 
 WORKDIR $PROJECT_PATH
 # USER bbq
-# ENV HOME=$PROJECT_PATH
+ENV HOME=$PROJECT_PATH
 RUN mkdir node_modules
 ENTRYPOINT git fetch && \
     git checkout $GIT_BRANCH && \
