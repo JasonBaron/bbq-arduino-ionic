@@ -40,7 +40,7 @@ export function mqttServiceFactory() {
     IonicModule.forRoot(MyApp),
     IonicStorageModule.forRoot({
       name: '__mydb',
-      driverOrder: ['localstorage', 'indexeddb', 'websql']
+      driverOrder: ['indexeddb', 'websql', 'localstorage']
     }),
     ChartModule,
     ProgressbarModule.forRoot(),
