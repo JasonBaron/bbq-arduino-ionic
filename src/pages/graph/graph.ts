@@ -2,8 +2,22 @@ import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import * as Highcharts from 'highcharts';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
+import { Storage } from '@ionic/storage';
 
 const TOPIC: string = 'test';
+
+interface Config {
+  desiredTemperature: number;
+  currentTemperature: number;
+  hideProgressbar: boolean;
+}
+
+interface State {
+  timeToCheck: number;
+  grill: Config;
+  meat: Config;
+  status: boolean;
+}
 
 @Component({
   selector: 'page-graph',
@@ -16,7 +30,8 @@ export class GraphPage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    public mqtt: MqttService) {
+    public mqtt: MqttService,
+    public storage: Storage) {
     Highcharts.setOptions({
       global: {
         useUTC: false
@@ -57,6 +72,16 @@ export class GraphPage {
     };
   }
 
+  getState(): void {
+    this.storage.get('app_state').then(
+      (state: State) => {
+        if (state.status === false) {
+          this.chart.series[0].setData([]);
+        }
+      }
+    );
+  }
+
   public saveChart(chart) {
     this.chart = chart;
   }
@@ -92,5 +117,9 @@ export class GraphPage {
         console.error(error);
       }
     );
+  }
+
+  ionViewDidEnter(): void {
+    this.getState();
   }
 }

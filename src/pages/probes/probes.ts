@@ -25,8 +25,6 @@ interface State {
   templateUrl: 'probes.html'
 })
 export class ProbesPage {
-  // private state: State; <--dont need?
-
   public appRunning: string;
   public grillCurrentTemp: number;
   public grillDesiredTemp: number;
@@ -213,8 +211,6 @@ export class ProbesPage {
 
   ionViewDidEnter(): void {
     this.getState();
-    //   this.storage.get('grillTemp').then(grillTempVal => {
-    //     this.storage.get('meatTemp').then(meatTempVal => {
     //       this.meat['hideProgressbar'] = false;
     //       this.grill['hideProgressbar'] = false;
     //       this.meat['desired'] = meatTempVal;
