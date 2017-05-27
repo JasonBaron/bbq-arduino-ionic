@@ -5,6 +5,8 @@ import { GrillConfigPage } from './grill-config/grill-config';
 import { MeatConfigPage } from './meat-config/meat-config';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
 
+const TOPIC: string = 'test';
+
 interface Config {
   desiredTemperature: number;
   currentTemperature: number;
@@ -15,19 +17,39 @@ interface State {
   timeToCheck: number;
   grill: Config;
   meat: Config;
-  status: string;
+  status: boolean;
 }
-
-const TOPIC: string = 'test';
 
 @Component({
   selector: 'page-probes',
   templateUrl: 'probes.html'
 })
 export class ProbesPage {
-  private state: State;
+  // private state: State; <--dont need?
 
-  public appStatus: string;
+  public appRunning: string;
+  public grillCurrentTemp: number;
+  public grillDesiredTemp: number;
+  public meatCurrentTemp: number;
+  public meatDesiredTemp: number;
+  public grillPbar: boolean;
+  public meatPbar: boolean;
+  public timeToCheck: number;
+
+  private defaultState: State = {
+    timeToCheck: 5,
+    status: false,
+    grill: {
+      desiredTemperature: 100,
+      currentTemperature: 87,
+      hideProgressbar: false
+    },
+    meat: {
+      desiredTemperature: 200,
+      currentTemperature: 50,
+      hideProgressbar: false
+    }
+  };
 
   constructor(
     public navCtrl: NavController,
@@ -36,27 +58,30 @@ export class ProbesPage {
   ) {
     storage.ready().then(
       () => {
-        this.state = {
-          timeToCheck: 5,
-          status: 'Not running',
-          grill: {
-            desiredTemperature: 0,
-            currentTemperature: 0,
-            hideProgressbar: true
-          },
-          meat: {
-            desiredTemperature: 0,
-            currentTemperature: 0,
-            hideProgressbar: true
-          }
-        };
-        storage.set('app_state', this.state).then(
+        storage.set('app_state', this.defaultState).then(
           () => {
             console.info('State set!');
           }
         );
       }
     );
+  }
+
+  setState(givenState): void {
+    let oldState: State;
+    let newState: State;
+    this.storage.get('app_state').then((state: State) => {
+      oldState = state;
+    }).then(() => {
+      newState = Object.assign({}, oldState, givenState);
+      this.storage.set('app_state', newState).then(
+        () => {
+          this.getState();
+        },
+        (error) => {
+          console.error("setState() error", error);
+        });
+    });
   }
 
   getGrillConfigPage(): Component {
@@ -67,34 +92,42 @@ export class ProbesPage {
     return MeatConfigPage;
   }
 
-  getStatus() {
+  getState(): void {
     this.storage.get('app_state').then(
       (state: State) => {
-        this.appStatus = state.status;
+        this.appRunning = state.status ? 'Running' : 'Not Running';
+        this.grillCurrentTemp = state.grill.currentTemperature;
+        this.grillDesiredTemp = state.grill.desiredTemperature;
+        this.meatCurrentTemp = state.meat.currentTemperature;
+        this.meatDesiredTemp = state.meat.desiredTemperature;
+        this.grillPbar = state.grill.hideProgressbar;
+        this.meatPbar = state.meat.hideProgressbar;
       }
     );
   }
 
-  // setTimeToCheck() {
-  //   console.info(`Desired Time To Check: ${this.check['timeToCheck']}`);
-  //   this.storage.set('timeToCheck', +this.check['timeToCheck']);
-  // }
+  setTimeToCheck() {
+    console.info("Desired Time To Check", this.timeToCheck);
+    this.setState({
+      timeToCheck: this.timeToCheck
+    });
+  }
 
-  // stop() {
-  //   let jsonMsg = JSON.stringify({
-  //     killswitch: true,
-  //     timeToCheck: 5
-  //   });
-  //   this.mqtt.publish(TOPIC, jsonMsg, {
-  //     retain: true
-  //   }).subscribe(
-  //     v => console.log(v),
-  //     e => console.warn(e),
-  //     () => {
-  //       this.status = "Not running";
-  //     }
-  //   );
-  // }
+  stop() {
+    let jsonMsg = JSON.stringify({
+      killswitch: true,
+      timeToCheck: 5
+    });
+    this.mqtt.publish(TOPIC, jsonMsg, {
+      retain: true
+    }).subscribe(
+      () => {
+        this.setState({
+          status: false
+        });
+      }
+      );
+  }
 
   // start() {
   //   this.storage.get('grillTempValid').then((grillTempValidValue) => {
@@ -133,60 +166,60 @@ export class ProbesPage {
   //   });
   // }
 
-  // clear() {
-  //   this.storage.clear().catch((error) => {
-  //     console.warn(error);
-  //   });
-  //   this.storage.set('grillTempValid', false);
-  //   this.storage.set('meatTempValid', false);
-  //   this.check['timeToCheck'] = 5;
-  //   this.grill['hideProgressbar'] = true;
-  //   this.grill['current'] = 0;
-  //   this.meat['hideProgressbar'] = true;
-  //   this.meat['current'] = 0;
-  //   this.check['timeToCheck'] = 5;
-  // }
+  clear() {
+    this.setState(this.defaultState);
+  }
+
+  getMQTTMessage() {
+    return this.mqtt.observe(TOPIC).subscribe(
+      (msg: MqttMessage) => {
+        try {
+          if (msg.topic === TOPIC) {
+            let jsonMsg: Object = JSON.parse(msg.payload.toString());
+            if (jsonMsg.hasOwnProperty('timeRecorded')) {
+              if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
+                if (jsonMsg.hasOwnProperty('grillTempRecorded')) {
+                  this.setState({
+                    grill: {
+                      currentTemperature: jsonMsg['grillTempRecorded']
+                    }
+                  });
+                }
+                if (jsonMsg.hasOwnProperty('meatTempRecorded')) {
+                  this.setState({
+                    meat: {
+                      currentTemperature: jsonMsg['meatTempRecorded']
+                    }
+                  });
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("JSON cannot be parsed!");
+        }
+      },
+      (error) => {
+        console.error("getMQTTMessage() error", error);
+      }
+    );
+  }
 
   ionViewDidLoad(): void {
     console.log('ionViewDidLoad ProbesPage');
-    this.getStatus();
-  //   this.mqtt.observe(TOPIC).subscribe(
-  //     (msg: MqttMessage) => {
-  //       try {
-  //         if (msg.topic === TOPIC) {
-  //           let jsonMsg: Object = JSON.parse(msg.payload.toString());
-  //           if (jsonMsg.hasOwnProperty('timeRecorded')) {
-  //             if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
-  //               if (jsonMsg.hasOwnProperty('grillTempRecorded')) {
-  //                 this.grill['current'] = jsonMsg['grillTempRecorded'];
-  //               }
-  //               if (jsonMsg.hasOwnProperty('meatTempRecorded')) {
-  //                 this.meat['current'] = jsonMsg['meatTempRecorded'];
-  //               }
-  //             }
-  //           }
-  //         }
-  //       } catch (e) {
-  //         console.warn("JSON cannot be parsed!");
-  //       }
-  //     },
-  //     (error) => {
-  //       console.error(error);
-  //     }
-  //   );
-  //   this.storage.set('grillTempValid', false);
-  //   this.storage.set('meatTempValid', false);
-  //   this.status = "Not running";
+    this.getState();
+    this.getMQTTMessage();
   }
 
-  // ionViewDidEnter(): void {
-  //   this.storage.get('grillTemp').then(grillTempVal => {
-  //     this.storage.get('meatTemp').then(meatTempVal => {
-  //       this.meat['hideProgressbar'] = false;
-  //       this.grill['hideProgressbar'] = false;
-  //       this.meat['desired'] = meatTempVal;
-  //       this.grill['desired'] = grillTempVal;
-  //     });
-  //   });
-  // }
+  ionViewDidEnter(): void {
+    this.getState();
+    //   this.storage.get('grillTemp').then(grillTempVal => {
+    //     this.storage.get('meatTemp').then(meatTempVal => {
+    //       this.meat['hideProgressbar'] = false;
+    //       this.grill['hideProgressbar'] = false;
+    //       this.meat['desired'] = meatTempVal;
+    //       this.grill['desired'] = grillTempVal;
+    //     });
+    //   });
+  }
 }
