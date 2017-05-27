@@ -4,9 +4,9 @@
   "homepage": "https://github.com/mdwagner/bbq-arduino",
   "private": false,
   "scripts": {
-    "ionic:clean": "./node_modules/.bin/ionic-app-scripts clean",
-    "ionic:build": "./node_modules/.bin/ionic-app-scripts build",
-    "ionic:serve": "./node_modules/.bin/ionic-app-scripts serve"
+    "ionic:clean": "ionic-app-scripts clean",
+    "ionic:build": "ionic-app-scripts build",
+    "ionic:serve": "ionic-app-scripts serve"
   },
   "dependencies": {
     "@angular/common": "2.4.8",
