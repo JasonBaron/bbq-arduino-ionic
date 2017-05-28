@@ -5,14 +5,29 @@ An Ionic 2 app that communicates with an Arduino board via MQTT, to monitor the 
 # Ionic 2.x
 ## Installation
 1. Install Node >= 6.x
-1. Install Cordova & Ionic CLI
+2. Install Cordova & Ionic CLI
    * `npm install -g cordova@6.5.0 ionic@2.2.0 `
-1. `npm install`
+3. `npm install`
+
+## Configure MQTT
+1. Inside `src/app/app.module.ts`, configure the settings to your own MQTT service
+```js
+export function mqttServiceFactory() {
+  return new MqttService({
+    hostname: '<HOSTNAME>',
+    port: <PORT>,
+    protocol: 'wss',
+    clientId: "client-" + Date.now(),
+    username: '<USERNAME>',
+    password: '<PASSWORD>'
+  });
+}
+```
 
 ## Run in web browser
 1. `npm run ionic:serve`
 
 ## Run on emulator
 1. `npm run ionic:build`
-1. `ionic platform add android` OR `ionic platform add ios`
-1. `ionic emulate android` OR `ionic emulate ios`
+2. `ionic platform add android` OR `ionic platform add ios`
+3. `ionic emulate android` OR `ionic emulate ios`
