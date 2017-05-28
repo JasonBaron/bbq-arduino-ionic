@@ -7,6 +7,7 @@ import { MqttService, MqttMessage } from 'angular2-mqtt';
 import State, { defaultState } from '../IState';
 import { Subscription } from 'rxjs';
 
+//TODO: change to receive topic
 const TOPIC: string = 'test';
 
 @Component({
