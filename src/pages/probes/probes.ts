@@ -4,7 +4,10 @@ import { Storage } from '@ionic/storage';
 import { GrillConfigPage } from './grill-config/grill-config';
 import { MeatConfigPage } from './meat-config/meat-config';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
+import State, { defaultState } from '../IState';
+import { Subscription } from 'rxjs';
 
+//TODO: change to receive topic
 const TOPIC: string = 'test';
 
 @Component({
@@ -12,38 +15,103 @@ const TOPIC: string = 'test';
   templateUrl: 'probes.html'
 })
 export class ProbesPage {
-  public grill: Object;
-  public meat: Object;
-  public check: Object;
-  public status: string;
+
+  /**
+   * Public variables for View (1-way)
+   */
+  public appRunning: string;
+  public grillCurrentTemp: number;
+  public grillDesiredTemp: number;
+  public meatCurrentTemp: number;
+  public meatDesiredTemp: number;
+  public grillPbar: boolean;
+  public meatPbar: boolean;
+  public timeToCheck: number;
+
+  public timeCheck: number = defaultState.timeToCheck; // For input (2-way)
 
   constructor(
     public navCtrl: NavController,
     public storage: Storage,
     public mqtt: MqttService
   ) {
-    this.grill = {
-      desired: 0,
-      current: 0,
-      hideProgressbar: true,
-      configPage: GrillConfigPage
-    };
-    this.meat = {
-      desired: 0,
-      current: 0,
-      hideProgressbar: true,
-      configPage: MeatConfigPage
-    };
-    this.check = {
-      timeToCheck: 5
-    };
+    storage.ready().then(
+      () => {
+        storage.set('app_state', defaultState).then(
+          () => {
+            console.info('State set!');
+          }
+        );
+      }
+    );
   }
 
+  /**
+   * Similar implementation to React's "setState"
+   * @param givenState: State(Like) - whatever you want changed
+   */
+  setState(givenState): void {
+    let oldState: State;
+    let newState: State;
+    this.storage.get('app_state').then((state: State) => {
+      oldState = state;
+    }).then(() => {
+      newState = Object.assign({}, oldState, givenState);
+      this.storage.set('app_state', newState).then(
+        () => {
+          this.getState();
+        },
+        (error) => {
+          console.error("setState() error", error);
+        });
+    });
+  }
+
+  /**
+   * Returns the GrillConfigPage component
+   */
+  getGrillConfigPage(): Component {
+    return GrillConfigPage;
+  }
+
+  /**
+   * Returns the MeatConfigPage component
+   */
+  getMeatConfigPage(): Component {
+    return MeatConfigPage;
+  }
+
+  /**
+   * Sets all public variables (ones being accessed from html view) to whatever is in state
+   */
+  getState(): void {
+    this.storage.get('app_state').then(
+      (state: State) => {
+        this.appRunning = state.status ? 'Running' : 'Not Running';
+        this.grillCurrentTemp = state.grillCurrentTemperature;
+        this.grillDesiredTemp = state.grillDesiredTemperature;
+        this.meatCurrentTemp = state.meatCurrentTemperature;
+        this.meatDesiredTemp = state.meatDesiredTemperature;
+        this.grillPbar = state.grillHideProgressbar;
+        this.meatPbar = state.meatHideProgressbar;
+        this.timeToCheck = state.timeToCheck;
+      }
+    );
+  }
+
+  /**
+   * Sets timeToCheck variable - How long between temperature checks?
+   */
   setTimeToCheck() {
-    console.info(`Desired Time To Check: ${this.check['timeToCheck']}`);
-    this.storage.set('timeToCheck', +this.check['timeToCheck']);
+    console.info("Desired Time To Check", this.timeCheck);
+    this.setState({
+      timeToCheck: this.timeCheck
+    });
   }
 
+  /**
+   * Stop the Arduino from taking readings and controlling the fan
+   */
   stop() {
     let jsonMsg = JSON.stringify({
       killswitch: true,
@@ -52,68 +120,53 @@ export class ProbesPage {
     this.mqtt.publish(TOPIC, jsonMsg, {
       retain: true
     }).subscribe(
-      v => console.log(v),
-      e => console.warn(e),
+      () => {},
+      err => { console.error(err); },
       () => {
-        this.status = "Not running";
+        this.setState({
+          status: false
+        });
       }
-    );
+    ).unsubscribe();
   }
 
+  /**
+   * Instructs the Arduino to start taking readings and controlling the fan
+   */
   start() {
-    this.storage.get('grillTempValid').then((grillTempValidValue) => {
-      this.storage.get('meatTempValid').then((meatTempValidValue) => {
-
-          if (grillTempValidValue && meatTempValidValue) {
-
-            this.storage.get('grillTemp').then((grillTempValue) => {
-              this.storage.get('meatTemp').then((meatTempValue) => {
-
-                  let jsonMsg = JSON.stringify({
-                    killswitch: false,
-                    timeToCheck: this.check['timeToCheck'],
-                    grillTemp: grillTempValue,
-                    meatTemp: meatTempValue
-                  });
-                  this.mqtt.publish(TOPIC, jsonMsg, {
-                    retain: false
-                  }).subscribe(
-                    v => console.log(v),
-                    e => console.warn(e),
-                    () => {
-                      this.status = "Running";
-                    }
-                  );
-
-              });
-            });
-
-          } else {
-            console.warn("Invalid submission");
-            this.status = "Not running";
-          }
-
-      });
+    this.getState(); // Gets fresh values
+    let jsonMsg = JSON.stringify({
+      killswitch: false,
+      timeToCheck: this.timeToCheck,
+      grillTemp: this.grillDesiredTemp,
+      meatTemp: this.meatDesiredTemp
     });
+    this.mqtt.publish(TOPIC, jsonMsg, {
+      retain: false
+    }).subscribe(
+      () => {},
+      err => { console.error(err); },
+      () => {
+        this.setState({
+          status: true
+        });
+      }
+    ).unsubscribe();
   }
 
+  /**
+   * Clear all fields to their default state
+   */
   clear() {
-    this.storage.clear().catch((error) => {
-      console.warn(error);
-    });
-    this.storage.set('grillTempValid', false);
-    this.storage.set('meatTempValid', false);
-    this.check['timeToCheck'] = 5;
-    this.grill['hideProgressbar'] = true;
-    this.grill['current'] = 0;
-    this.meat['hideProgressbar'] = true;
-    this.meat['current'] = 0;
-    this.check['timeToCheck'] = 5;
+    this.setState(defaultState);
+    this.timeCheck = defaultState.timeToCheck;
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad ProbesPage');
-    this.mqtt.observe(TOPIC).subscribe(
+  /**
+   * Starts MQTT Message subscription service
+   */
+  getMQTTMessage(): Subscription {
+    return this.mqtt.observe(TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {
           if (msg.topic === TOPIC) {
@@ -121,10 +174,14 @@ export class ProbesPage {
             if (jsonMsg.hasOwnProperty('timeRecorded')) {
               if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
                 if (jsonMsg.hasOwnProperty('grillTempRecorded')) {
-                  this.grill['current'] = jsonMsg['grillTempRecorded'];
+                  this.setState({
+                    grillCurrentTemperature: jsonMsg['grillTempRecorded']
+                  });
                 }
                 if (jsonMsg.hasOwnProperty('meatTempRecorded')) {
-                  this.meat['current'] = jsonMsg['meatTempRecorded'];
+                  this.setState({
+                    meatCurrentTemperature: jsonMsg['meatTempRecorded']
+                  });
                 }
               }
             }
@@ -134,22 +191,25 @@ export class ProbesPage {
         }
       },
       (error) => {
-        console.error(error);
+        console.error("getMQTTMessage() error", error);
       }
     );
-    this.storage.set('grillTempValid', false);
-    this.storage.set('meatTempValid', false);
-    this.status = "Not running";
   }
 
-  ionViewDidEnter() {
-    this.storage.get('grillTemp').then(grillTempVal => {
-      this.storage.get('meatTemp').then(meatTempVal => {
-        this.meat['hideProgressbar'] = false;
-        this.grill['hideProgressbar'] = false;
-        this.meat['desired'] = meatTempVal;
-        this.grill['desired'] = grillTempVal;
-      });
-    });
+  /**
+   * Is called after Component constructor is finished
+   */
+  ionViewDidLoad(): void {
+    console.log('ionViewDidLoad ProbesPage');
+    this.getState();
+    this.getMQTTMessage();
+  }
+
+  /**
+   * Is called when you leave and come back to this page
+   */
+  ionViewDidEnter(): void {
+    console.log('ionViewDidEnter ProbesPage');
+    this.getState();
   }
 }

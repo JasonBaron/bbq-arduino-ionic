@@ -10,7 +10,8 @@
   <ion-grid>
     <ion-row center>
       <ion-col padding-left padding-bottom text-left>
-        <h1>{{ status }}</h1>
+        <h1>App Status: {{ appRunning }}</h1>
+        <button ion-button (click)="getState()">Refresh</button>
       </ion-col>
     </ion-row>
 
@@ -19,7 +20,7 @@
         <h1 style="margin-bottom: 20px;">Grill</h1>
       </ion-col>
       <ion-col padding-right text-right>
-        <button ion-button clear large class="probeHeaderBtn" [navPush]="grill['configPage']">
+        <button ion-button clear large class="probeHeaderBtn" [navPush]="getGrillConfigPage()">
             <h3 style="margin-top: 10px;">Set</h3>
         </button>
       </ion-col>
@@ -29,14 +30,14 @@
       <ion-col>
         <h2>
           <ion-icon name="thermometer"></ion-icon>
-          {{ grill['current'] }}&deg;F
+          {{ grillCurrentTemp }}&deg;F
         </h2>
       </ion-col>
     </ion-row>
 
     <ion-row>
       <ion-col>
-        <progressbar [hidden]="grill['hideProgressbar']" class="progress" [max]="grill['desired']" [value]="grill['current']"></progressbar>
+        <progressbar [hidden]="grillPbar" class="progress" [max]="grillDesiredTemp" [value]="grillCurrentTemp"></progressbar>
       </ion-col>
     </ion-row>
 
@@ -45,7 +46,7 @@
         <h1 style="margin-bottom: 20px;">Meat</h1>
       </ion-col>
       <ion-col padding-right text-right>
-        <button ion-button clear large class="probeHeaderBtn" [navPush]="meat['configPage']">
+        <button ion-button clear large class="probeHeaderBtn" [navPush]="getMeatConfigPage()">
             <h3 style="margin-top: 10px;">Set</h3>
         </button>
       </ion-col>
@@ -55,14 +56,14 @@
       <ion-col>
         <h2>
           <ion-icon name="thermometer"></ion-icon>
-          {{ meat['current'] }}&deg;F
+          {{ meatCurrentTemp }}&deg;F
         </h2>
       </ion-col>
     </ion-row>
 
     <ion-row>
       <ion-col>
-        <progressbar [hidden]="meat['hideProgressbar']" class="progress" [max]="meat['desired']" [value]="meat['current']"></progressbar>
+        <progressbar [hidden]="meatPbar" class="progress" [max]="meatDesiredTemp" [value]="meatCurrentTemp"></progressbar>
       </ion-col>
     </ion-row>
 
@@ -71,7 +72,7 @@
         <ion-label>Time to check (seconds)</ion-label>
       </ion-col>
       <ion-col>
-        <ion-input style="border-style: solid;" type="number" placeholder="5" step=5 min=1 max=300 value=5 [(ngModel)]="check['timeToCheck']" name="checkingTime"></ion-input>
+        <ion-input style="border-style: solid;" type="number" placeholder="5" step=5 min=1 max=300 value=5 [(ngModel)]="timeCheck" name="checkingTime"></ion-input>
       </ion-col>
     </ion-row>
 

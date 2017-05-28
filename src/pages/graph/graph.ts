@@ -2,7 +2,10 @@ import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import * as Highcharts from 'highcharts';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
+import { Storage } from '@ionic/storage';
+import State from '../IState';
 
+//TODO: change to receive topic
 const TOPIC: string = 'test';
 
 @Component({
@@ -10,13 +13,16 @@ const TOPIC: string = 'test';
   templateUrl: 'graph.html'
 })
 export class GraphPage {
+
   public chart: any;
   private options: Object;
 
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    public mqtt: MqttService) {
+    public mqtt: MqttService,
+    public storage: Storage
+  ) {
     Highcharts.setOptions({
       global: {
         useUTC: false
@@ -45,6 +51,7 @@ export class GraphPage {
         labels: {
           format: "{value}\u00B0F"
         },
+        //TODO: change these before deploy
         minTickInterval: 1,
         maxTickInterval: 5,
         min: 80,
@@ -57,6 +64,23 @@ export class GraphPage {
     };
   }
 
+  getState(): void {
+    this.storage.get('app_state').then(
+      (state: State) => {
+        /**
+         * If App is not running, reset data
+         */
+        if (state.status === false) {
+          this.chart.series[0].setData([]);
+        }
+      }
+    );
+  }
+
+  /**
+   * Highcharts needs this for some reason
+   * @param chart
+   */
   public saveChart(chart) {
     this.chart = chart;
   }
@@ -92,5 +116,10 @@ export class GraphPage {
         console.error(error);
       }
     );
+  }
+
+  ionViewDidEnter(): void {
+    console.log('ionViewDidEnter GraphPage');
+    this.getState();
   }
 }
