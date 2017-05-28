@@ -4,27 +4,20 @@ import { Storage } from '@ionic/storage';
 import { GrillConfigPage } from './grill-config/grill-config';
 import { MeatConfigPage } from './meat-config/meat-config';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
+import State, { defaultState } from '../IState';
+import { Subscription } from 'rxjs';
 
 const TOPIC: string = 'test';
-
-interface Config {
-  desiredTemperature: number;
-  currentTemperature: number;
-  hideProgressbar: boolean;
-}
-
-interface State {
-  timeToCheck: number;
-  grill: Config;
-  meat: Config;
-  status: boolean;
-}
 
 @Component({
   selector: 'page-probes',
   templateUrl: 'probes.html'
 })
 export class ProbesPage {
+
+  /**
+   * Public variables for View (1-way)
+   */
   public appRunning: string;
   public grillCurrentTemp: number;
   public grillDesiredTemp: number;
@@ -34,20 +27,7 @@ export class ProbesPage {
   public meatPbar: boolean;
   public timeToCheck: number;
 
-  private defaultState: State = {
-    timeToCheck: 5,
-    status: false,
-    grill: {
-      desiredTemperature: 100,
-      currentTemperature: 87,
-      hideProgressbar: false
-    },
-    meat: {
-      desiredTemperature: 200,
-      currentTemperature: 50,
-      hideProgressbar: false
-    }
-  };
+  public timeCheck: number = 5; // For input (2-way)
 
   constructor(
     public navCtrl: NavController,
@@ -56,7 +36,7 @@ export class ProbesPage {
   ) {
     storage.ready().then(
       () => {
-        storage.set('app_state', this.defaultState).then(
+        storage.set('app_state', defaultState).then(
           () => {
             console.info('State set!');
           }
@@ -93,21 +73,23 @@ export class ProbesPage {
   getState(): void {
     this.storage.get('app_state').then(
       (state: State) => {
+        console.info(state);
         this.appRunning = state.status ? 'Running' : 'Not Running';
-        this.grillCurrentTemp = state.grill.currentTemperature;
-        this.grillDesiredTemp = state.grill.desiredTemperature;
-        this.meatCurrentTemp = state.meat.currentTemperature;
-        this.meatDesiredTemp = state.meat.desiredTemperature;
-        this.grillPbar = state.grill.hideProgressbar;
-        this.meatPbar = state.meat.hideProgressbar;
+        this.grillCurrentTemp = state.grillCurrentTemperature;
+        this.grillDesiredTemp = state.grillDesiredTemperature;
+        this.meatCurrentTemp = state.meatCurrentTemperature;
+        this.meatDesiredTemp = state.meatDesiredTemperature;
+        this.grillPbar = state.grillHideProgressbar;
+        this.meatPbar = state.meatHideProgressbar;
+        this.timeToCheck = state.timeToCheck;
       }
     );
   }
 
   setTimeToCheck() {
-    console.info("Desired Time To Check", this.timeToCheck);
+    console.info("Desired Time To Check", this.timeCheck);
     this.setState({
-      timeToCheck: this.timeToCheck
+      timeToCheck: this.timeCheck
     });
   }
 
@@ -119,56 +101,42 @@ export class ProbesPage {
     this.mqtt.publish(TOPIC, jsonMsg, {
       retain: true
     }).subscribe(
+      () => {},
+      err => { console.error(err); },
       () => {
         this.setState({
           status: false
         });
       }
-      );
+    ).unsubscribe();
   }
 
-  // start() {
-  //   this.storage.get('grillTempValid').then((grillTempValidValue) => {
-  //     this.storage.get('meatTempValid').then((meatTempValidValue) => {
-
-  //         if (grillTempValidValue && meatTempValidValue) {
-
-  //           this.storage.get('grillTemp').then((grillTempValue) => {
-  //             this.storage.get('meatTemp').then((meatTempValue) => {
-
-  //                 let jsonMsg = JSON.stringify({
-  //                   killswitch: false,
-  //                   timeToCheck: this.check['timeToCheck'],
-  //                   grillTemp: grillTempValue,
-  //                   meatTemp: meatTempValue
-  //                 });
-  //                 this.mqtt.publish(TOPIC, jsonMsg, {
-  //                   retain: false
-  //                 }).subscribe(
-  //                   v => console.log(v),
-  //                   e => console.warn(e),
-  //                   () => {
-  //                     this.status = "Running";
-  //                   }
-  //                 );
-
-  //             });
-  //           });
-
-  //         } else {
-  //           console.warn("Invalid submission");
-  //           this.status = "Not running";
-  //         }
-
-  //     });
-  //   });
-  // }
+  start() {
+    this.getState();
+    let jsonMsg = JSON.stringify({
+      killswitch: false,
+      timeToCheck: this.timeToCheck,
+      grillTemp: this.grillDesiredTemp,
+      meatTemp: this.meatDesiredTemp
+    });
+    this.mqtt.publish(TOPIC, jsonMsg, {
+      retain: false
+    }).subscribe(
+      () => {},
+      err => { console.error(err); },
+      () => {
+        this.setState({
+          status: true
+        });
+      }
+    ).unsubscribe();
+  }
 
   clear() {
-    this.setState(this.defaultState);
+    this.setState(defaultState);
   }
 
-  getMQTTMessage() {
+  getMQTTMessage(): Subscription {
     return this.mqtt.observe(TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {
@@ -178,16 +146,12 @@ export class ProbesPage {
               if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
                 if (jsonMsg.hasOwnProperty('grillTempRecorded')) {
                   this.setState({
-                    grill: {
-                      currentTemperature: jsonMsg['grillTempRecorded']
-                    }
+                    grillCurrentTemperature: jsonMsg['grillTempRecorded']
                   });
                 }
                 if (jsonMsg.hasOwnProperty('meatTempRecorded')) {
                   this.setState({
-                    meat: {
-                      currentTemperature: jsonMsg['meatTempRecorded']
-                    }
+                    meatCurrentTemperature: jsonMsg['meatTempRecorded']
                   });
                 }
               }
@@ -210,12 +174,7 @@ export class ProbesPage {
   }
 
   ionViewDidEnter(): void {
+    console.log('ionViewDidEnter ProbesPage');
     this.getState();
-    //       this.meat['hideProgressbar'] = false;
-    //       this.grill['hideProgressbar'] = false;
-    //       this.meat['desired'] = meatTempVal;
-    //       this.grill['desired'] = grillTempVal;
-    //     });
-    //   });
   }
 }

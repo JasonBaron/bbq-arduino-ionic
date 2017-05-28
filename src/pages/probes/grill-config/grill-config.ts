@@ -1,16 +1,19 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
+import State from '../../IState';
 
 @Component({
   selector: 'page-grill-config',
   templateUrl: 'grill-config.html'
 })
 export class GrillConfigPage {
+
   public beef: any;
   public custom: any;
   public customDisabled: boolean;
   public defaultCheck: boolean;
+
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
@@ -21,6 +24,20 @@ export class GrillConfigPage {
     this.customDisabled = true;
   }
 
+  setState(givenState): void {
+    let oldState: State;
+    let newState: State;
+    this.storage.get('app_state').then((state: State) => {
+      oldState = state;
+    }).then(() => {
+      newState = Object.assign({}, oldState, givenState);
+      this.storage.set('app_state', newState).catch(
+        (error) => {
+          console.error("setState() error", error);
+        });
+    });
+  }
+
   setDesiredTemp() {
     let grillTemp: number;
     if (this.beef === 'custom') {
@@ -28,9 +45,11 @@ export class GrillConfigPage {
     } else {
       grillTemp = parseInt(this.beef);
     }
-    this.storage.set('grillTemp', grillTemp);
-    this.storage.set('grillTempValid', true);
-    console.info(`Desired Grill Temp: ${grillTemp}`);
+    this.setState({
+      grillDesiredTemperature: grillTemp,
+      grillHideProgressbar: false
+    });
+    console.info("Desired Grill Temp", grillTemp);
   }
 
   customSlider(e: boolean) {
