@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, Platform } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 import { GrillConfigPage } from './grill-config/grill-config';
 import { MeatConfigPage } from './meat-config/meat-config';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
 import State, { defaultState } from '../IState';
-import { Subscription } from 'rxjs';
 
 //TODO: change to receive topic
 const TOPIC: string = 'test';
@@ -31,17 +30,27 @@ export class ProbesPage {
   public timeCheck: number = defaultState.timeToCheck; // For input (2-way)
 
   constructor(
-    public navCtrl: NavController,
-    public storage: Storage,
-    public mqtt: MqttService
+    private navCtrl: NavController,
+    private storage: Storage,
+    private mqtt: MqttService,
+    private platform: Platform
   ) {
-    storage.ready().then(
+    platform.ready().then(
       () => {
-        storage.set('app_state', defaultState).then(
-          () => {
-            console.info('State set!');
-          }
-        );
+        console.info('Platform is ready');
+        return storage.ready();
+      }
+    ).then(
+      () => {
+        console.info('Storage is ready');
+        return storage.set('app_state', defaultState);
+      }
+    ).then(
+      () => {
+        console.info('State set!');
+      },
+      (error) => {
+        console.error('State was not set!');
       }
     );
   }
@@ -51,20 +60,23 @@ export class ProbesPage {
    * @param givenState: State(Like) - whatever you want changed
    */
   setState(givenState): void {
-    let oldState: State;
-    let newState: State;
-    this.storage.get('app_state').then((state: State) => {
-      oldState = state;
-    }).then(() => {
-      newState = Object.assign({}, oldState, givenState);
-      this.storage.set('app_state', newState).then(
-        () => {
-          this.getState();
-        },
-        (error) => {
-          console.error("setState() error", error);
-        });
-    });
+    this.storage.ready().then(
+      () => {
+        return this.storage.get('app_state');
+      }
+    ).then(
+      (currentState: State) => {
+        const newState: State = Object.assign({}, currentState, givenState);
+        return this.storage.set('app_state', newState);
+      }
+    ).then(
+      () => {
+        this.getState();
+      },
+      (error) => {
+        console.warn('State could not be set!');
+      }
+    );
   }
 
   /**
@@ -85,7 +97,11 @@ export class ProbesPage {
    * Sets all public variables (ones being accessed from html view) to whatever is in state
    */
   getState(): void {
-    this.storage.get('app_state').then(
+    this.storage.ready().then(
+      () => {
+        return this.storage.get('app_state');
+      }
+    ).then(
       (state: State) => {
         this.appRunning = state.status ? 'Running' : 'Not Running';
         this.grillCurrentTemp = state.grillCurrentTemperature;
@@ -121,13 +137,11 @@ export class ProbesPage {
       retain: true
     }).subscribe(
       () => {},
-      err => { console.error(err); },
+      err => console.error("stop()", err),
       () => {
-        this.setState({
-          status: false
-        });
+        this.setState({ status: false });
       }
-    ).unsubscribe();
+    );
   }
 
   /**
@@ -145,13 +159,15 @@ export class ProbesPage {
       retain: false
     }).subscribe(
       () => {},
-      err => { console.error(err); },
+      err => {
+        console.error(err);
+        this.setState({ status: false });
+      },
       () => {
-        this.setState({
-          status: true
-        });
+        // When mqtt publishes successfully it fires complete(), not next()
+        this.setState({ status: true });
       }
-    ).unsubscribe();
+    );
   }
 
   /**
@@ -165,24 +181,22 @@ export class ProbesPage {
   /**
    * Starts MQTT Message subscription service
    */
-  getMQTTMessage(): Subscription {
-    return this.mqtt.observe(TOPIC).subscribe(
+  startMQTTMessages(): void {
+    this.mqtt.observe(TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {
-          if (msg.topic === TOPIC) {
-            let jsonMsg: Object = JSON.parse(msg.payload.toString());
-            if (jsonMsg.hasOwnProperty('timeRecorded')) {
-              if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
-                if (jsonMsg.hasOwnProperty('grillTempRecorded')) {
-                  this.setState({
-                    grillCurrentTemperature: jsonMsg['grillTempRecorded']
-                  });
-                }
-                if (jsonMsg.hasOwnProperty('meatTempRecorded')) {
-                  this.setState({
-                    meatCurrentTemperature: jsonMsg['meatTempRecorded']
-                  });
-                }
+          const jsonMsg: Object = JSON.parse(msg.payload.toString());
+          if (jsonMsg.hasOwnProperty('timeRecorded')) {
+            if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
+              if (jsonMsg.hasOwnProperty('grillTempRecorded')) {
+                this.setState({
+                  grillCurrentTemperature: jsonMsg['grillTempRecorded']
+                });
+              }
+              if (jsonMsg.hasOwnProperty('meatTempRecorded')) {
+                this.setState({
+                  meatCurrentTemperature: jsonMsg['meatTempRecorded']
+                });
               }
             }
           }
@@ -201,8 +215,11 @@ export class ProbesPage {
    */
   ionViewDidLoad(): void {
     console.log('ionViewDidLoad ProbesPage');
-    this.getState();
-    this.getMQTTMessage();
+    Promise.resolve(this.getState()).then(
+      () => {
+        this.startMQTTMessages();
+      }
+    );
   }
 
   /**
