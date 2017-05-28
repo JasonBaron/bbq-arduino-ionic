@@ -5,6 +5,7 @@ import { MqttService, MqttMessage } from 'angular2-mqtt';
 import { Storage } from '@ionic/storage';
 import State from '../IState';
 
+//TODO: change to receive topic
 const TOPIC: string = 'test';
 
 @Component({
@@ -50,6 +51,7 @@ export class GraphPage {
         labels: {
           format: "{value}\u00B0F"
         },
+        //TODO: change these before deploy
         minTickInterval: 1,
         maxTickInterval: 5,
         min: 80,
@@ -75,6 +77,10 @@ export class GraphPage {
     );
   }
 
+  /**
+   * Highcharts needs this for some reason
+   * @param chart
+   */
   public saveChart(chart) {
     this.chart = chart;
   }
