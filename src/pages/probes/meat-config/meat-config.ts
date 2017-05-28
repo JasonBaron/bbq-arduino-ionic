@@ -12,34 +12,35 @@ export class MeatConfigPage {
   public meat: any;
 
   constructor(
-    public navCtrl: NavController,
-    public navParams: NavParams,
-    public storage: Storage
+    private navCtrl: NavController,
+    private navParams: NavParams,
+    private storage: Storage
   ) {
     this.meat = 200;
   }
 
   setState(givenState): void {
-    let oldState: State;
-    let newState: State;
-    this.storage.get('app_state').then((state: State) => {
-      oldState = state;
-    }).then(() => {
-      newState = Object.assign({}, oldState, givenState);
-      this.storage.set('app_state', newState).catch(
-        (error) => {
-          console.error("setState() error", error);
-        });
-    });
+    this.storage.ready().then(
+      () => {
+        return this.storage.get('app_state');
+      }
+    ).then(
+      (currentState: State) => {
+        const newState: State = Object.assign({}, currentState, givenState);
+        return this.storage.set('app_state', newState);
+      }
+    ).catch(
+      (error) => { (console.warn('State could not be set!', error)) }
+    );
   }
 
   setDesiredTemp() {
-    let meatTemp: number = this.meat;
+    const meatTemp: number = this.meat;
+    console.info("Desired Meat Temp", meatTemp);
     this.setState({
       meatDesiredTemperature: meatTemp,
       meatHideProgressbar: false
     });
-    console.info("Desired Meat Temp", meatTemp);
   }
 
   ionViewDidLoad() {

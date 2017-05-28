@@ -15,13 +15,13 @@ const TOPIC: string = 'test';
 export class GraphPage {
 
   public chart: any;
-  private options: Object;
+  public options: Object;
 
   constructor(
-    public navCtrl: NavController,
-    public navParams: NavParams,
-    public mqtt: MqttService,
-    public storage: Storage
+    private navCtrl: NavController,
+    private navParams: NavParams,
+    private mqtt: MqttService,
+    private storage: Storage
   ) {
     Highcharts.setOptions({
       global: {
@@ -65,11 +65,12 @@ export class GraphPage {
   }
 
   getState(): void {
-    this.storage.get('app_state').then(
+    this.storage.ready().then(
+      () => {
+        return this.storage.get('app_state');
+      }
+    ).then(
       (state: State) => {
-        /**
-         * If App is not running, reset data
-         */
         if (state.status === false) {
           this.chart.series[0].setData([]);
         }
@@ -78,10 +79,10 @@ export class GraphPage {
   }
 
   /**
-   * Highcharts needs this for some reason
+   * Highcharts needs this to load the chart
    * @param chart
    */
-  public saveChart(chart) {
+  saveChart(chart) {
     this.chart = chart;
   }
 
@@ -90,21 +91,19 @@ export class GraphPage {
     this.mqtt.observe(TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {
-          if (msg.topic === TOPIC) {
-            let jsonMsg: Object = JSON.parse(msg.payload.toString());
-            if (jsonMsg.hasOwnProperty('grillTempRecorded') && jsonMsg.hasOwnProperty('timeRecorded')) {
-              if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
-                if (this.chart.series[0].data.length === 30) {
-                  this.chart.series[0].addPoint([
-                    jsonMsg['timeRecorded'] * 1000,
-                    jsonMsg['grillTempRecorded']
-                  ], true, true);
-                } else {
-                  this.chart.series[0].addPoint([
-                    jsonMsg['timeRecorded'] * 1000,
-                    jsonMsg['grillTempRecorded']
-                  ]);
-                }
+          let jsonMsg: Object = JSON.parse(msg.payload.toString());
+          if (jsonMsg.hasOwnProperty('grillTempRecorded') && jsonMsg.hasOwnProperty('timeRecorded')) {
+            if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
+              if (this.chart.series[0].data.length === 30) {
+                this.chart.series[0].addPoint([
+                  jsonMsg['timeRecorded'] * 1000,
+                  jsonMsg['grillTempRecorded']
+                ], true, true);
+              } else {
+                this.chart.series[0].addPoint([
+                  jsonMsg['timeRecorded'] * 1000,
+                  jsonMsg['grillTempRecorded']
+                ]);
               }
             }
           }

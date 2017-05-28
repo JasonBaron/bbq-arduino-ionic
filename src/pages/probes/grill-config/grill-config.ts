@@ -15,9 +15,9 @@ export class GrillConfigPage {
   public defaultCheck: boolean;
 
   constructor(
-    public navCtrl: NavController,
-    public navParams: NavParams,
-    public storage: Storage
+    private navCtrl: NavController,
+    private navParams: NavParams,
+    private storage: Storage
   ) {
     this.beef = 130;
     this.custom = 200;
@@ -25,17 +25,18 @@ export class GrillConfigPage {
   }
 
   setState(givenState): void {
-    let oldState: State;
-    let newState: State;
-    this.storage.get('app_state').then((state: State) => {
-      oldState = state;
-    }).then(() => {
-      newState = Object.assign({}, oldState, givenState);
-      this.storage.set('app_state', newState).catch(
-        (error) => {
-          console.error("setState() error", error);
-        });
-    });
+    this.storage.ready().then(
+      () => {
+        return this.storage.get('app_state');
+      }
+    ).then(
+      (currentState: State) => {
+        const newState: State = Object.assign({}, currentState, givenState);
+        return this.storage.set('app_state', newState);
+      }
+    ).catch(
+      (error) => { (console.warn('State could not be set!', error)) }
+    );
   }
 
   setDesiredTemp() {
@@ -45,15 +46,15 @@ export class GrillConfigPage {
     } else {
       grillTemp = parseInt(this.beef);
     }
+    console.info("Desired Grill Temp", grillTemp);
     this.setState({
       grillDesiredTemperature: grillTemp,
       grillHideProgressbar: false
     });
-    console.info("Desired Grill Temp", grillTemp);
   }
 
-  customSlider(e: boolean) {
-    this.customDisabled = !e;
+  customSlider(toggle: boolean) {
+    this.customDisabled = !toggle;
   }
 
   ionViewDidLoad() {
