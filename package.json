@@ -7,7 +7,7 @@
     "ionic:clean": "ionic-app-scripts clean",
     "ionic:build": "ionic-app-scripts build",
     "ionic:serve": "ionic-app-scripts serve",
-    "ionic:s": "ionic-app-scripts serve -b"
+    "serve": "ionic-app-scripts serve -b"
   },
   "dependencies": {
     "@angular/common": "2.4.8",
