@@ -6,7 +6,7 @@ import { Storage } from '@ionic/storage';
 import State from '../IState';
 
 //TODO: change to receive topic
-const TOPIC: string = 'test';
+const TOPIC: string = 'sensor';
 
 @Component({
   selector: 'page-graph',
