@@ -6,7 +6,7 @@ import { Storage } from '@ionic/storage';
 import State from '../IState';
 
 //TODO: change to receive topic
-const TOPIC: string = 'sensor';
+const IN_TOPIC: string = 'sensor';
 
 @Component({
   selector: 'page-graph',
@@ -52,10 +52,10 @@ export class GraphPage {
           format: "{value}\u00B0F"
         },
         //TODO: change these before deploy
-        minTickInterval: 1,
-        maxTickInterval: 5,
+        minTickInterval: 10,
+        maxTickInterval: 50,
         min: 80,
-        max: 90
+        max: 300
       },
       tooltip: {
         pointFormat: "{point.y}\u00B0F",
@@ -88,7 +88,7 @@ export class GraphPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad GraphPage');
-    this.mqtt.observe(TOPIC).subscribe(
+    this.mqtt.observe(IN_TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {
           let jsonMsg: Object = JSON.parse(msg.payload.toString());
