@@ -7,7 +7,8 @@ import { MqttService, MqttMessage } from 'angular2-mqtt';
 import State, { defaultState } from '../IState';
 
 //TODO: change to receive topic
-const TOPIC: string = 'config';
+const OUT_TOPIC: string = 'config';
+const IN_TOPIC: string = 'sensor';
 
 @Component({
   selector: 'page-probes',
@@ -43,7 +44,13 @@ export class ProbesPage {
     ).then(
       () => {
         console.info('Storage is ready');
-        return storage.set('app_state', defaultState);
+        return storage.get('app_state');
+      }
+    ).then(
+      (data) => {
+        if (data == null) {
+          return storage.set('app_state', defaultState);
+        }
       }
     ).then(
       () => {
@@ -133,7 +140,7 @@ export class ProbesPage {
       killswitch: true,
       timeToCheck: 5
     });
-    this.mqtt.publish(TOPIC, jsonMsg, {
+    this.mqtt.publish(OUT_TOPIC, jsonMsg, {
       retain: true
     }).subscribe(
       () => {},
@@ -155,7 +162,7 @@ export class ProbesPage {
       grillTemp: this.grillDesiredTemp,
       meatTemp: this.meatDesiredTemp
     });
-    this.mqtt.publish(TOPIC, jsonMsg, {
+    this.mqtt.publish(OUT_TOPIC, jsonMsg, {
       retain: false
     }).subscribe(
       () => {},
@@ -182,20 +189,16 @@ export class ProbesPage {
    * Starts MQTT Message subscription service
    */
   startMQTTMessages(): void {
-    this.mqtt.observe(TOPIC).subscribe(
+    this.mqtt.observe(IN_TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {
           const jsonMsg: Object = JSON.parse(msg.payload.toString());
           if (jsonMsg.hasOwnProperty('timeRecorded')) {
             if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
-              if (jsonMsg.hasOwnProperty('grillTempRecorded')) {
+              if (jsonMsg.hasOwnProperty('grillTempRecorded') || jsonMsg.hasOwnProperty('meatTempRecorded')) {
                 this.setState({
-                  grillCurrentTemperature: jsonMsg['grillTempRecorded']
-                });
-              }
-              if (jsonMsg.hasOwnProperty('meatTempRecorded')) {
-                this.setState({
-                  meatCurrentTemperature: jsonMsg['meatTempRecorded']
+                  grillCurrentTemperature: jsonMsg['grillTempRecorded'] | 0,
+                  meatCurrentTemperature: jsonMsg['meatTempRecorded'] | 0
                 });
               }
             }
@@ -215,11 +218,8 @@ export class ProbesPage {
    */
   ionViewDidLoad(): void {
     console.log('ionViewDidLoad ProbesPage');
-    Promise.resolve(this.getState()).then(
-      () => {
-        this.startMQTTMessages();
-      }
-    );
+    this.getState();
+    this.startMQTTMessages();
   }
 
   /**
