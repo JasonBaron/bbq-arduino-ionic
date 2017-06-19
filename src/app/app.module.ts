@@ -1,6 +1,10 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { IonicStorageModule } from '@ionic/storage';
+import { StoreModule } from '@ngrx/store';
+
+import { stateReducer, initialState } from '../reducers';
+
 import { MyApp } from './app.component';
 
 import { TabsPage } from '../pages/tabs/tabs';
@@ -38,6 +42,9 @@ export function mqttServiceFactory() {
   ],
   imports: [
     IonicModule.forRoot(MyApp),
+    StoreModule.provideStore({
+      state: stateReducer
+    }, initialState),
     IonicStorageModule.forRoot({
       name: '__mydb',
       driverOrder: ['indexeddb', 'websql', 'localstorage']

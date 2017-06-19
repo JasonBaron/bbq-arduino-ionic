@@ -10,7 +10,7 @@ jdk:
   - oraclejdk8
 before_install:
   - . $HOME/.nvm/nvm.sh
-  - nvm install $NODE_VERSION
+  - nvm install
   - node --version
 install:
   - npm install -g ionic@2.2.0 cordova@6.5.0
