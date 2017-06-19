@@ -33,7 +33,7 @@ export class ProbesPage {
 
   public timeCheck: number; // For input (2-way)
 
-  public state$: Observable<AppState>;
+  // public state$: Observable<AppState>;
 
   constructor(
     private navCtrl: NavController,
@@ -41,16 +41,21 @@ export class ProbesPage {
     private platform: Platform,
     private _store: Store<AppState>
   ) {
-    this.state$ = _store.select('state');
-    this.appRunning = this.state$['status'] ? 'Running' : 'Not Running';
-    this.grillCurrentTemp = this.state$['grillCurrentTemperature'];
-    this.grillDesiredTemp = this.state$['grillDesiredTemperature'];
-    this.meatCurrentTemp = this.state$['meatCurrentTemperature'];
-    this.meatDesiredTemp = this.state$['meatDesiredTemperature'];
-    this.grillPbar = this.state$['grillHideProgressbar'];
-    this.meatPbar = this.state$['meatHideProgressbar'];
-    this.timeToCheck = this.state$['timeToCheck'];
-    this.status = this.state$['status'];
+    this._store.select('state').subscribe(
+      (state$: Observable<AppState>) => {
+        this.appRunning = state$['status'] ? 'Running' : 'Not Running';
+        this.grillDesiredTemp = state$['grillDesiredTemperature'];
+        this.meatDesiredTemp = state$['meatDesiredTemperature'];
+        this.timeToCheck = state$['timeToCheck'];
+        this.grillCurrentTemp = state$['grillCurrentTemperature'];
+        this.meatCurrentTemp = state$['meatCurrentTemperature'];
+        this.grillPbar = state$['grillHideProgressbar'];
+        this.meatPbar = state$['meatHideProgressbar'];
+      }
+    );
+    // this.grillDesiredTemp = this.state$['grillDesiredTemperature'];
+    // this.meatDesiredTemp = this.state$['meatDesiredTemperature'];
+    // this.timeToCheck = this.state$['timeToCheck'];
     // platform.ready().then(
     //   () => {
     //     console.info('Platform is ready');
@@ -178,9 +183,9 @@ export class ProbesPage {
     // this.getState(); // Gets fresh values
     let jsonMsg = JSON.stringify({
       killswitch: false,
-      timeToCheck: this.state$['timeToCheck'],
-      grillTemp: this.state$['grillDesiredTemperature'],
-      meatTemp: this.state$['meatDesiredTemperature']
+      timeToCheck: this.timeToCheck,
+      grillTemp: this.grillDesiredTemp,
+      meatTemp: this.meatDesiredTemp
     });
     this.mqtt.publish(OUT_TOPIC, jsonMsg, {
       retain: false
@@ -205,9 +210,18 @@ export class ProbesPage {
   clear() {
     // this.setState(defaultState);
     this._store.dispatch({ type: 'RESET_STATE' });
-    this.timeCheck = this.state$['timeToCheck'];
-    console.log(this.appRunning, this.grillCurrentTemp);
+    // this.timeCheck = this.state$['timeToCheck'];
+    // console.log(this.appRunning, this.grillCurrentTemp);
   }
+
+  // getState() {
+  //   console.log(this.appRunning);
+  //   // this.state$.subscribe(
+  //   //   (data) => {
+  //   //     console.log(data);
+  //   //   }
+  //   // );
+  // }
 
   /**
    * Starts MQTT Message subscription service
@@ -249,7 +263,6 @@ export class ProbesPage {
    */
   ionViewDidLoad(): void {
     console.log('ionViewDidLoad ProbesPage');
-    // this.getState();
     this.startMQTTMessages();
   }
 
