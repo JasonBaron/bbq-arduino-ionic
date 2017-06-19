@@ -22,14 +22,14 @@ export class ProbesPage {
    * Public variables for View (1-way)
    */
   public appRunning: string;
-  public grillCurrentTemp: Observable<number>;
-  public grillDesiredTemp: Observable<number>;
-  public meatCurrentTemp: Observable<number>;
-  public meatDesiredTemp: Observable<number>;
-  public grillPbar: Observable<boolean>;
-  public meatPbar: Observable<boolean>;
-  public timeToCheck: Observable<number>;
-  public status: Observable<boolean>;
+  public grillCurrentTemp: number;
+  public grillDesiredTemp: number;
+  public meatCurrentTemp: number;
+  public meatDesiredTemp: number;
+  public grillPbar: boolean;
+  public meatPbar: boolean;
+  public timeToCheck: number;
+  public status: boolean;
 
   public timeCheck: number; // For input (2-way)
 
@@ -42,6 +42,15 @@ export class ProbesPage {
     private _store: Store<AppState>
   ) {
     this.state$ = _store.select('state');
+    this.appRunning = this.state$['status'] ? 'Running' : 'Not Running';
+    this.grillCurrentTemp = this.state$['grillCurrentTemperature'];
+    this.grillDesiredTemp = this.state$['grillDesiredTemperature'];
+    this.meatCurrentTemp = this.state$['meatCurrentTemperature'];
+    this.meatDesiredTemp = this.state$['meatDesiredTemperature'];
+    this.grillPbar = this.state$['grillHideProgressbar'];
+    this.meatPbar = this.state$['meatHideProgressbar'];
+    this.timeToCheck = this.state$['timeToCheck'];
+    this.status = this.state$['status'];
     // platform.ready().then(
     //   () => {
     //     console.info('Platform is ready');
@@ -195,8 +204,9 @@ export class ProbesPage {
    */
   clear() {
     // this.setState(defaultState);
-    // this.timeCheck = defaultState.timeToCheck;
     this._store.dispatch({ type: 'RESET_STATE' });
+    this.timeCheck = this.state$['timeToCheck'];
+    console.log(this.appRunning, this.grillCurrentTemp);
   }
 
   /**

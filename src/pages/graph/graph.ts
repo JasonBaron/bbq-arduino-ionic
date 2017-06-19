@@ -3,7 +3,7 @@ import { NavController, NavParams } from 'ionic-angular';
 import * as Highcharts from 'highcharts';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
 import { Storage } from '@ionic/storage';
-import State from '../IState';
+// import State from '../IState';
 
 //TODO: change to receive topic
 const IN_TOPIC: string = 'sensor';
@@ -70,7 +70,7 @@ export class GraphPage {
         return this.storage.get('app_state');
       }
     ).then(
-      (state: State) => {
+      (state) => {
         if (state.status === false) {
           this.chart.series[0].setData([]);
         }

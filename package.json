@@ -25,6 +25,7 @@
     "@ionic/storage": "2.0.0",
     "@ngrx/core": "^1.2.0",
     "@ngrx/store": "^2.2.2",
+    "@ngrx/store-devtools": "^3.2.4",
     "angular2-highcharts": "^0.4.1",
     "angular2-mqtt": "1.5.1",
     "bootstrap": "^3.3.7",

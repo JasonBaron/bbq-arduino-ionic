@@ -55,16 +55,10 @@ export function stateReducer(state: AppState = initialState, action: Action) {
       });
 
     case 'SET_GRILL_MEAT_DESIRED_TEMPERATURE':
-      return Object.assign({}, state, {
-        grillDesiredTemperature: action.payload['grillDesiredTemperature'],
-        meatDesiredTemperature: action.payload['meatDesiredTemperature']
-      });
+      return Object.assign({}, state, action.payload);
 
     case 'SET_GRILL_MEAT_CURRENT_TEMPERATURE':
-      return Object.assign({}, state, {
-        grillCurrentTemperature: action.payload['grillCurrentTemperature'],
-        meatCurrentTemperature: action.payload['meatCurrentTemperature']
-      });
+      return Object.assign({}, state, action.payload);
 
     case 'STATUS_ON':
       return Object.assign({}, state, {

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
-import State from '../../IState';
+// import State from '../../IState';
 
 @Component({
   selector: 'page-grill-config',
@@ -30,8 +30,8 @@ export class GrillConfigPage {
         return this.storage.get('app_state');
       }
     ).then(
-      (currentState: State) => {
-        const newState: State = Object.assign({}, currentState, givenState);
+      (currentState) => {
+        const newState = Object.assign({}, currentState, givenState);
         return this.storage.set('app_state', newState);
       }
     ).catch(
