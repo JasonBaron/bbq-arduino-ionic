@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
+import { Store } from '@ngrx/store';
 import * as Highcharts from 'highcharts';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
-import { Storage } from '@ionic/storage';
-// import State from '../IState';
+import AppState from '../../interfaces';
+import { Observable } from 'rxjs/Observable';
 
 //TODO: change to receive topic
 const IN_TOPIC: string = 'sensor';
@@ -18,11 +19,16 @@ export class GraphPage {
   public options: Object;
 
   constructor(
-    private navCtrl: NavController,
-    private navParams: NavParams,
-    private mqtt: MqttService,
-    private storage: Storage
+    private _navCtrl: NavController,
+    private _navParams: NavParams,
+    private _mqtt: MqttService,
+    private _store: Store<AppState>
   ) {
+    this._store.select('state').subscribe(
+      (state$: Observable<AppState>) => {
+        state$['status'] === false && this.chart.series[0].setData([]);
+      }
+    );
     Highcharts.setOptions({
       global: {
         useUTC: false
@@ -64,20 +70,6 @@ export class GraphPage {
     };
   }
 
-  getState(): void {
-    this.storage.ready().then(
-      () => {
-        return this.storage.get('app_state');
-      }
-    ).then(
-      (state) => {
-        if (state.status === false) {
-          this.chart.series[0].setData([]);
-        }
-      }
-    );
-  }
-
   /**
    * Highcharts needs this to load the chart
    * @param chart
@@ -88,7 +80,7 @@ export class GraphPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad GraphPage');
-    this.mqtt.observe(IN_TOPIC).subscribe(
+    this._mqtt.observe(IN_TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {
           let jsonMsg: Object = JSON.parse(msg.payload.toString());
@@ -119,6 +111,5 @@ export class GraphPage {
 
   ionViewDidEnter(): void {
     console.log('ionViewDidEnter GraphPage');
-    this.getState();
   }
 }

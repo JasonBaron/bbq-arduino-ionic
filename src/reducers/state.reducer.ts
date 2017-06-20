@@ -1,4 +1,4 @@
-import { ActionReducer, Action } from '@ngrx/store';
+import { Action } from '@ngrx/store';
 import AppState from '../interfaces';
 
 export const initialState = {
@@ -54,10 +54,13 @@ export function stateReducer(state: AppState = initialState, action: Action) {
         meatHideProgressbar: false
       });
 
-    case 'SET_GRILL_MEAT_DESIRED_TEMPERATURE':
+    case 'SET_GRILL_MEAT_CURRENT_TEMPERATURE':
       return Object.assign({}, state, action.payload);
 
-    case 'SET_GRILL_MEAT_CURRENT_TEMPERATURE':
+    case 'SET_GRILL_CONFIG':
+      return Object.assign({}, state, action.payload);
+
+    case 'SET_MEAT_CONFIG':
       return Object.assign({}, state, action.payload);
 
     case 'STATUS_ON':

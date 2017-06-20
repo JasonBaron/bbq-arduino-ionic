@@ -2,6 +2,7 @@ import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { IonicStorageModule } from '@ionic/storage';
 import { StoreModule } from '@ngrx/store';
+// import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
 import { stateReducer, initialState } from '../reducers';
@@ -46,6 +47,7 @@ export function mqttServiceFactory() {
     StoreModule.provideStore({
       state: stateReducer
     }, initialState),
+    // EffectsModule.run(PersistStoreEffects),
     StoreDevtoolsModule.instrumentOnlyWithExtension({
       maxAge: 5
     }),
