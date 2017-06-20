@@ -24,11 +24,6 @@ export class GraphPage {
     private _mqtt: MqttService,
     private _store: Store<AppState>
   ) {
-    this._store.select('state').subscribe(
-      (state$: Observable<AppState>) => {
-        state$['status'] === false && this.chart.series[0].setData([]);
-      }
-    );
     Highcharts.setOptions({
       global: {
         useUTC: false
@@ -80,6 +75,11 @@ export class GraphPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad GraphPage');
+    this._store.select('state').subscribe(
+      (state$: Observable<AppState>) => {
+        state$['status'] === false && this.chart.series[0].setData([]);
+      }
+    );
     this._mqtt.observe(IN_TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {

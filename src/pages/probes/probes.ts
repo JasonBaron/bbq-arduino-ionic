@@ -163,6 +163,7 @@ export class ProbesPage {
   ionViewDidLoad(): void {
     console.log('ionViewDidLoad ProbesPage');
     this.startMQTTMessages();
+    this._store.select('hydrated').subscribe(data => console.info(`Hydration Status: ${data}`));
   }
 
   /**

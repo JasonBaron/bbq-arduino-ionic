@@ -14,54 +14,26 @@ export const initialState = {
 
 export function stateReducer(state: AppState = initialState, action: Action) {
   switch(action.type) {
-    case 'SET_GRILL_DESIRED_TEMPERATURE':
-      return Object.assign({}, state, {
-        grillDesiredTemperature: action.payload
-      });
-
-    case 'SET_GRILL_CURRENT_TEMPERATURE':
-      return Object.assign({}, state, {
-        grillCurrentTemperature: action.payload
-      });
-
-    case 'GRILL_HIDE_PROGRESSBAR':
-      return Object.assign({}, state, {
-        grillHideProgressbar: true
-      });
-
-    case 'GRILL_SHOW_PROGRESSBAR':
-      return Object.assign({}, state, {
-        grillHideProgressbar: false
-      });
-
-    case 'SET_MEAT_DESIRED_TEMPERATURE':
-      return Object.assign({}, state, {
-        meatDesiredTemperature: action.payload
-      });
-
-    case 'SET_MEAT_CURRENT_TEMPERATURE':
-      return Object.assign({}, state, {
-        meatCurrentTemperature: action.payload
-      });
-
-    case 'MEAT_HIDE_PROGRESSBAR':
-      return Object.assign({}, state, {
-        meatHideProgressbar: true
-      });
-
-    case 'MEAT_SHOW_PROGRESSBAR':
-      return Object.assign({}, state, {
-        meatHideProgressbar: false
-      });
-
     case 'SET_GRILL_MEAT_CURRENT_TEMPERATURE':
-      return Object.assign({}, state, action.payload);
+      const { grillCurrentTemperature, meatCurrentTemperature } = action.payload;
+      return Object.assign({}, state, {
+        grillCurrentTemperature,
+        meatCurrentTemperature
+      });
 
     case 'SET_GRILL_CONFIG':
-      return Object.assign({}, state, action.payload);
+      const { grillDesiredTemperature, grillHideProgressbar } = action.payload;
+      return Object.assign({}, state, {
+        grillDesiredTemperature,
+        grillHideProgressbar
+      });
 
     case 'SET_MEAT_CONFIG':
-      return Object.assign({}, state, action.payload);
+      const { meatDesiredTemperature, meatHideProgressbar } = action.payload;
+      return Object.assign({}, state, {
+        meatDesiredTemperature,
+        meatHideProgressbar
+      });
 
     case 'STATUS_ON':
       return Object.assign({}, state, {

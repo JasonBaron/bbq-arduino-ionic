@@ -31,7 +31,6 @@ export class GrillConfigPage {
     } else {
       grillTemp = parseInt(this.beef);
     }
-    console.info("Desired Grill Temp", grillTemp);
     this._store.dispatch({
       type: 'SET_GRILL_CONFIG',
       payload: {

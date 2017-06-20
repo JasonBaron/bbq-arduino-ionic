@@ -21,7 +21,6 @@ export class MeatConfigPage {
 
   setDesiredTemp() {
     const meatTemp: number = this.meat;
-    console.info("Desired Meat Temp", meatTemp);
     this._store.dispatch({
       type: 'SET_MEAT_CONFIG',
       payload: {
