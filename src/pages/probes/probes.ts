@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { NavController, Platform } from 'ionic-angular';
-import { Storage } from '@ionic/storage';
+import { NavController} from 'ionic-angular';
+import { Store } from '@ngrx/store';
 import { GrillConfigPage } from './grill-config/grill-config';
 import { MeatConfigPage } from './meat-config/meat-config';
 import { MqttService, MqttMessage } from 'angular2-mqtt';
-import State, { defaultState } from '../IState';
+import AppState from '../../interfaces';
+import { Observable } from 'rxjs/Observable';
 
 //TODO: change to receive topic
 const OUT_TOPIC: string = 'config';
@@ -19,7 +20,6 @@ export class ProbesPage {
   /**
    * Public variables for View (1-way)
    */
-  public appRunning: string;
   public grillCurrentTemp: number;
   public grillDesiredTemp: number;
   public meatCurrentTemp: number;
@@ -27,61 +27,25 @@ export class ProbesPage {
   public grillPbar: boolean;
   public meatPbar: boolean;
   public timeToCheck: number;
+  public status: boolean;
 
-  public timeCheck: number = defaultState.timeToCheck; // For input (2-way)
+  public timeCheck: any; // For input (2-way)
 
   constructor(
-    private navCtrl: NavController,
-    private storage: Storage,
-    private mqtt: MqttService,
-    private platform: Platform
+    private _navCtrl: NavController,
+    private _mqtt: MqttService,
+    private _store: Store<AppState>
   ) {
-    platform.ready().then(
-      () => {
-        console.info('Platform is ready');
-        return storage.ready();
-      }
-    ).then(
-      () => {
-        console.info('Storage is ready');
-        return storage.get('app_state');
-      }
-    ).then(
-      (data) => {
-        if (data == null) {
-          return storage.set('app_state', defaultState);
-        }
-      }
-    ).then(
-      () => {
-        console.info('State set!');
-      },
-      (error) => {
-        console.error('State was not set!');
-      }
-    );
-  }
-
-  /**
-   * Similar implementation to React's "setState"
-   * @param givenState: State(Like) - whatever you want changed
-   */
-  setState(givenState): void {
-    this.storage.ready().then(
-      () => {
-        return this.storage.get('app_state');
-      }
-    ).then(
-      (currentState: State) => {
-        const newState: State = Object.assign({}, currentState, givenState);
-        return this.storage.set('app_state', newState);
-      }
-    ).then(
-      () => {
-        this.getState();
-      },
-      (error) => {
-        console.warn('State could not be set!');
+    this._store.select('state').subscribe(
+      (state$: Observable<AppState>) => {
+        this.grillCurrentTemp = state$['grillCurrentTemperature'];
+        this.grillDesiredTemp = state$['grillDesiredTemperature'];
+        this.meatCurrentTemp = state$['meatCurrentTemperature'];
+        this.meatDesiredTemp = state$['meatDesiredTemperature'];
+        this.grillPbar = state$['grillHideProgressbar'];
+        this.meatPbar = state$['meatHideProgressbar'];
+        this.timeToCheck = state$['timeToCheck'];
+        this.status = state$['status'];
       }
     );
   }
@@ -101,34 +65,12 @@ export class ProbesPage {
   }
 
   /**
-   * Sets all public variables (ones being accessed from html view) to whatever is in state
-   */
-  getState(): void {
-    this.storage.ready().then(
-      () => {
-        return this.storage.get('app_state');
-      }
-    ).then(
-      (state: State) => {
-        this.appRunning = state.status ? 'Running' : 'Not Running';
-        this.grillCurrentTemp = state.grillCurrentTemperature;
-        this.grillDesiredTemp = state.grillDesiredTemperature;
-        this.meatCurrentTemp = state.meatCurrentTemperature;
-        this.meatDesiredTemp = state.meatDesiredTemperature;
-        this.grillPbar = state.grillHideProgressbar;
-        this.meatPbar = state.meatHideProgressbar;
-        this.timeToCheck = state.timeToCheck;
-      }
-    );
-  }
-
-  /**
    * Sets timeToCheck variable - How long between temperature checks?
    */
   setTimeToCheck() {
-    console.info("Desired Time To Check", this.timeCheck);
-    this.setState({
-      timeToCheck: this.timeCheck
+    this._store.dispatch({
+      type: 'SET_TIME_TO_CHECK',
+      payload: parseInt(this.timeCheck)
     });
   }
 
@@ -140,13 +82,13 @@ export class ProbesPage {
       killswitch: true,
       timeToCheck: 5
     });
-    this.mqtt.publish(OUT_TOPIC, jsonMsg, {
+    this._mqtt.publish(OUT_TOPIC, jsonMsg, {
       retain: true
     }).subscribe(
       () => {},
       err => console.error("stop()", err),
       () => {
-        this.setState({ status: false });
+        this._store.dispatch({ type: 'STATUS_OFF' });
       }
     );
   }
@@ -155,24 +97,23 @@ export class ProbesPage {
    * Instructs the Arduino to start taking readings and controlling the fan
    */
   start() {
-    this.getState(); // Gets fresh values
     let jsonMsg = JSON.stringify({
       killswitch: false,
       timeToCheck: this.timeToCheck,
       grillTemp: this.grillDesiredTemp,
       meatTemp: this.meatDesiredTemp
     });
-    this.mqtt.publish(OUT_TOPIC, jsonMsg, {
+    this._mqtt.publish(OUT_TOPIC, jsonMsg, {
       retain: false
     }).subscribe(
       () => {},
       err => {
         console.error(err);
-        this.setState({ status: false });
+        this._store.dispatch({ type: 'STATUS_OFF' });
       },
       () => {
         // When mqtt publishes successfully it fires complete(), not next()
-        this.setState({ status: true });
+        this._store.dispatch({ type: 'STATUS_ON' });
       }
     );
   }
@@ -181,24 +122,27 @@ export class ProbesPage {
    * Clear all fields to their default state
    */
   clear() {
-    this.setState(defaultState);
-    this.timeCheck = defaultState.timeToCheck;
+    this._store.dispatch({ type: 'RESET_STATE' });
+    this.timeCheck = this.timeToCheck;
   }
 
   /**
    * Starts MQTT Message subscription service
    */
   startMQTTMessages(): void {
-    this.mqtt.observe(IN_TOPIC).subscribe(
+    this._mqtt.observe(IN_TOPIC).subscribe(
       (msg: MqttMessage) => {
         try {
           const jsonMsg: Object = JSON.parse(msg.payload.toString());
           if (jsonMsg.hasOwnProperty('timeRecorded')) {
             if ((jsonMsg['timeRecorded'] * 1000) > (Date.now() - 86400000)) {
               if (jsonMsg.hasOwnProperty('grillTempRecorded') || jsonMsg.hasOwnProperty('meatTempRecorded')) {
-                this.setState({
-                  grillCurrentTemperature: jsonMsg['grillTempRecorded'] | 0,
-                  meatCurrentTemperature: jsonMsg['meatTempRecorded'] | 0
+                this._store.dispatch({
+                  type: 'SET_GRILL_MEAT_CURRENT_TEMPERATURE',
+                  payload: {
+                    grillCurrentTemperature: parseInt(jsonMsg['grillTempRecorded']) | 0,
+                    meatCurrentTemperature: parseInt(jsonMsg['meatTempRecorded']) | 0
+                  }
                 });
               }
             }
@@ -218,8 +162,8 @@ export class ProbesPage {
    */
   ionViewDidLoad(): void {
     console.log('ionViewDidLoad ProbesPage');
-    this.getState();
     this.startMQTTMessages();
+    this._store.select('hydrated').subscribe(data => console.info(`Hydration Status: ${data}`));
   }
 
   /**
@@ -227,6 +171,5 @@ export class ProbesPage {
    */
   ionViewDidEnter(): void {
     console.log('ionViewDidEnter ProbesPage');
-    this.getState();
   }
 }

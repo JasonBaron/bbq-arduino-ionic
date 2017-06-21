@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
-import { Storage } from '@ionic/storage';
-import State from '../../IState';
+import { Store } from '@ngrx/store';
+import AppState from '../../../interfaces';
 
 @Component({
   selector: 'page-grill-config',
@@ -15,28 +15,13 @@ export class GrillConfigPage {
   public defaultCheck: boolean;
 
   constructor(
-    private navCtrl: NavController,
-    private navParams: NavParams,
-    private storage: Storage
+    private _navCtrl: NavController,
+    private _navParams: NavParams,
+    private _store: Store<AppState>
   ) {
     this.beef = 130;
     this.custom = 200;
     this.customDisabled = true;
-  }
-
-  setState(givenState): void {
-    this.storage.ready().then(
-      () => {
-        return this.storage.get('app_state');
-      }
-    ).then(
-      (currentState: State) => {
-        const newState: State = Object.assign({}, currentState, givenState);
-        return this.storage.set('app_state', newState);
-      }
-    ).catch(
-      (error) => { (console.warn('State could not be set!', error)) }
-    );
   }
 
   setDesiredTemp() {
@@ -46,10 +31,12 @@ export class GrillConfigPage {
     } else {
       grillTemp = parseInt(this.beef);
     }
-    console.info("Desired Grill Temp", grillTemp);
-    this.setState({
-      grillDesiredTemperature: grillTemp,
-      grillHideProgressbar: false
+    this._store.dispatch({
+      type: 'SET_GRILL_CONFIG',
+      payload: {
+        grillDesiredTemperature: grillTemp,
+        grillHideProgressbar: false
+      }
     });
   }
 
