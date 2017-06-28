@@ -61,6 +61,9 @@ export class GraphPage {
       tooltip: {
         pointFormat: "{point.y}\u00B0F",
         xDateFormat: "%A, %b %e, %I:%M:%S %P"
+      },
+      credits: {
+        enabled: false
       }
     };
   }
